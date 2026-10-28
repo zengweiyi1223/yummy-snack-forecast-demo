@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YUMMY SNACK</title>
+<style>
+:root {
+  --bg:#f8fafc; --panel:#ffffff; --card:#ffffff; --border:#e2e8f0;
+  --text:#0f172a; --sub:#475569; --muted:#94a3b8;
+  --brand:#f97316; --brand2:#3b82f6; --good:#10b981; --bad:#ef4444; --warn:#f59e0b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0}
+.brand{display:flex;align-items:center;gap:12px;padding:0 20px 24px}
+.logo{font-size:28px}
+.title{font-size:16px;font-weight:700;letter-spacing:.5px;color:var(--text)}
+.sub{font-size:11px;color:var(--muted);margin-top:2px}
+nav{flex:1}
+nav a{display:block;padding:10px 20px;color:var(--sub);text-decoration:none;font-size:13px;border-left:3px solid transparent;cursor:pointer}
+nav a:hover{color:var(--text);background:rgba(0,0,0,.03)}
+nav a.active{color:var(--brand);border-left-color:var(--brand);background:rgba(249,115,22,.08)}
+.foot{padding:16px 20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)}
+main{flex:1;overflow-y:auto;padding:24px 28px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+h1{font-size:22px;font-weight:700;color:var(--text)}
+.meta{display:flex;align-items:center;gap:12px;color:var(--sub);font-size:12px}
+.badge{background:rgba(249,115,22,.12);color:var(--brand);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.filters{display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+select,button{height:36px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:0 12px;font-size:13px;outline:none}
+select{cursor:pointer}
+#f-region,#f-city,#f-cat{min-width:120px;width:140px}
+#f-store{min-width:160px;width:200px}
+#f-sku{min-width:200px;width:240px}
+#f-horizon{min-width:80px;width:100px}
+select:focus{border-color:var(--brand)}
+button.primary{background:var(--brand);color:#fff;border:none;font-weight:600;cursor:pointer;padding:0 18px}
+button.primary:hover{filter:brightness(.95)}
+button.ghost{background:transparent;color:var(--sub);border:1px solid var(--border);font-weight:500;cursor:pointer;padding:0 16px}
+button.ghost:hover{color:var(--text);border-color:var(--muted)}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),#fb923c);opacity:.85}
+.k-label{font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500}
+.k-value{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-.5px}
+.k-desc{font-size:11px;color:var(--muted);margin-top:6px}
+.kpi:nth-child(2)::before{background:linear-gradient(90deg,var(--brand2),#60a5fa)}
+.kpi:nth-child(3)::before{background:linear-gradient(90deg,var(--good),#34d399)}
+.kpi:nth-child(4)::before{background:linear-gradient(90deg,var(--bad),#f87171)}
+.chart-section{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:0}
+.chart-left, .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.chart-left{display:flex;flex-direction:column}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.chart-header h3{font-size:14px;font-weight:600;color:var(--text)}
+.chart-box{height:360px;flex:1}
+.chart-right{display:flex;flex-direction:column;gap:14px}
+.chart-right .panel{flex:1;overflow-y:auto}
+.panel h4{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)}
+.method-list{list-style:none;font-size:12px;color:var(--sub);line-height:2}
+.method-list li{padding-left:14px;position:relative}
+.method-list li::before{content:"•";position:absolute;left:0;color:var(--brand)}
+.factor{font-size:12px;color:var(--sub);padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+.factor:last-child{border-bottom:none}
+.factor span{color:var(--text);font-weight:600}
+/* 底部业务提示（全宽，替代原橙色洞察条） */
+.alert-section{margin-top:16px;margin-bottom:20px}
+.alert-box-full{background:var(--card);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.alert-box-full h4{color:var(--bad);font-size:13px;font-weight:600;margin-bottom:8px}
+#alert-content{font-size:12px;color:var(--sub);line-height:1.7}
+/* 顶部 tooltip：白底黑框无阴影 */
+.title-wrap{display:flex;align-items:center;gap:8px}
+.tooltip-wrap{position:relative;display:inline-block;cursor:help}
+.tooltip-trigger{padding:0;border:0;cursor:help;width:20px;height:20px;border-radius:50%;background:var(--muted);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.tooltip-text{display:none;width:780px;background:#fff;color:var(--text);border:1px solid #000;border-radius:0;padding:16px;position:absolute;z-index:100;top:28px;left:-100px;font-size:11px;line-height:1.6}
+.tooltip-wrap:hover .tooltip-text,.tooltip-wrap:focus-within .tooltip-text{display:block}
+.tooltip-text h5{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--brand)}
+.tooltip-text table{width:100%;font-size:10px;border-collapse:collapse;margin-top:8px}
+.tooltip-text th,.tooltip-text td{padding:5px 6px;border:1px solid #e5e7eb;text-align:left;vertical-align:top}
+.tooltip-text th{background:#f8faff;font-weight:600;color:#374151}
+.tooltip-text td{color:#4b5563}
+.table-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.table-section h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
+.table-section h3 small{color:var(--muted);font-weight:400}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--sub);font-weight:500;padding:10px 8px;border-bottom:1px solid var(--border);white-space:nowrap;background:#f8fafc}
+td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--sub);white-space:nowrap}
+tr:hover td{background:rgba(0,0,0,.02)}
+.status-good{color:var(--good)}.status-warn{color:var(--warn)}.status-bad{color:var(--bad)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+
+</style>
+<script src="lib/echarts.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🍿</div>
+      <div>
+        <div class="title">零食有鸣</div>
+        <div class="sub">YUMMY SNACK</div>
+      </div>
+    </div>
+    <nav>
+      <a class="active">📈 需求预测</a>
+      <a>📊 经营总览（开发中）</a>
+      <a>🧃 商品分析（开发中）</a>
+      <a>🏪 门店管控（开发中）</a>
+      <a>👤 会员洞察（开发中）</a>
+    </nav>
+    <div class="foot">v2.0 · 逻辑先行版</div>
+  </aside>
+
+  <main>
+    <header>
+      <div class="title-wrap">
+        <h1>店 × SKU 需求预测</h1>
+        <div class="tooltip-wrap">
+          <button type="button" class="tooltip-trigger" aria-label="查看预测策略说明">ⓘ</button>
+          <div class="tooltip-text">
+            <h5>零食有鸣需求预测策略体系</h5>
+            <table>
+              <tr><th>维度</th><th>短保日配</th><th>低温食品</th><th>常规食品</th><th>日用百货</th><th>美妆个护</th><th>文具小百</th></tr>
+              <tr><td><b>保质期</b></td><td>≤3天</td><td>7~21天</td><td>>21天</td><td>无/极长</td><td>无/极长</td><td>无/极长</td></tr>
+              <tr><td><b>参考数据</b></td><td>最近30天</td><td>最近60天</td><td>90天+去年同期</td><td>120天历史 / 30天均值</td><td>120天移动平均</td><td>120天移动平均</td></tr>
+              <tr><td><b>周Pattern</b></td><td>工作日高<br>周末低</td><td>周末高<br>周中平稳</td><td>周末高<br>周一低</td><td>无显著规律</td><td>无显著规律</td><td>无显著规律</td></tr>
+              <tr><td><b>季节性</b></td><td>弱（开学季及暑假）</td><td>弱（夏+25%）</td><td>强（按品类）</td><td>极弱</td><td>极弱</td><td>弱（开学季+15%）</td></tr>
+              <tr><td><b>节庆因子</b></td><td colspan="6">演示规则：国庆 1.8 倍、中秋 1.5 倍；所有品类相同</td></tr>
+              <tr><td><b>安全库存</b></td><td>≤1天销量</td><td>1~2天销量</td><td>3~5天销量</td><td>7~14天销量</td><td>7~14天销量</td><td>7~14天销量</td></tr>
+              <tr><td><b>订货频率</b></td><td>每日凌晨</td><td>2~3天</td><td>按周期批量</td><td>1~2周</td><td>1~2周</td><td>1~2周</td></tr>
+              <tr><td><b>冷启动</b></td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td></tr>
+            </table>
+            <div style="margin-top:8px;font-size:11px;color:#6b7280">短保品安全库存≤1天销量；常规品按1.28σ×√lead_time计算；非食品类用SMA简单移动平均</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="badge">演示环境 · Mock 数据</span>
+        <span id="data-date">数据日期: 计算中…</span>
+      </div>
+    </header>
+
+    <!-- 筛选栏 -->
+    <section class="filters">
+      <div class="field">
+        <label>战区</label>
+        <select id="f-region"><option>珠三角</option><option>粤西粤东</option><option>海南</option></select>
+      </div>
+      <div class="field">
+        <label>城市</label>
+        <select id="f-city"><option>广州</option><option>深圳</option><option>佛山</option><option>东莞</option></select>
+      </div>
+      <div class="field">
+        <label>门店</label>
+        <select id="f-store"></select>
+      </div>
+      <div class="field">
+        <label>品类</label>
+        <select id="f-cat"><option value="all">全部</option><option value="短保">短保（日配）</option><option value="低温">低温（5~21天）</option><option value="常规">常规（>21天）</option><option value="日用">日用百货</option><option value="个护">美妆个护</option><option value="文具">文具小百</option></select>
+      </div>
+      <div class="field">
+        <label>SKU</label>
+        <select id="f-sku"></select>
+      </div>
+      <div class="field">
+        <label>预测 Horizon</label>
+        <div id="f-horizon-display" style="height:36px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--sub);padding:0 12px;font-size:13px;display:flex;align-items:center;">14 天</div>
+        <input type="hidden" id="f-horizon" value="14">
+      </div>
+      <button id="btn-run" class="primary">生成预测</button><button id="btn-export" class="ghost" title="下载当前店×SKU的预测明细CSV">导出当前预测</button>
+    </section>
+
+    <!-- 核心指标卡 -->
+    <section class="kpi-row">
+      <div class="kpi">
+        <div class="k-label">建议订货量</div>
+        <div class="k-value" id="k-suggest">--</div>
+        <div class="k-desc">覆盖期预测 + 安全库存 − 当前库存 − 在途</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">预测准确率（回测）</div>
+        <div class="k-value" id="k-accuracy">--</div>
+        <div class="k-desc">最近14天逐日单步预测 vs 实际销量</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">当前库存</div>
+        <div class="k-value" id="k-stock">--</div>
+        <div class="k-desc">截至昨日 24:00 快照</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">在途库存</div>
+        <div class="k-value" id="k-intransit">--</div>
+        <div class="k-desc">已下单未到货</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">安全库存</div>
+        <div class="k-value" id="k-safety">--</div>
+        <div class="k-desc">统计安全库存与品类下限取较大值；短保设上限</div>
+      </div>
+    </section>
+
+    <!-- 主图表区 -->
+    <section class="chart-section">
+      <div class="chart-left">
+        <div class="chart-header">
+          <h3>历史 <span id="hist-label">60</span> 天销量 + 未来 <span id="h-label">14</span> 天需求预测</h3>
+        </div>
+        <div id="main-chart" class="chart-box">
+          <div id="chart-empty" style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:14px;">请选择条件后点击「生成预测」</div>
+        </div>
+      </div>
+      <div class="chart-right">
+        <div class="panel" id="method-panel">
+          <h4>预测方法</h4>
+          <ul class="method-list" id="method-list">
+            <li>请选择条件后查看当前 SKU 预测方法</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h4>关键因子拆解</h4>
+          <div class="factor" id="f-trend">趋势：--</div>
+          <div class="factor" id="f-week">周 Pattern：--</div>
+          <div class="factor" id="f-holiday">节庆因子：--</div>
+          <div class="factor" id="f-volatility">波动系数(CV)：--</div>
+          <div class="factor" id="f-spoilage">模拟报损率：--</div>
+          <div class="factor" id="f-refwindow">参考窗口：--</div>
+          <div class="factor" id="f-yoy">历史同期修正：--</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 业务提示（全宽，替代原橙色洞察条） -->
+    <section class="alert-section" id="alert-section">
+      <div class="alert-box-full" id="alert-box">
+        <h4>⚠️ 业务提示</h4>
+        <div id="alert-content"><div style="color:#94a3b8;">请选择条件后点击「生成预测」</div></div>
+      </div>
+    </section>
+
+    <!-- 明细表 -->
+    <section class="table-section">
+      <h3>预测明细 <small id="detail-horizon">逐日拆解</small></h3>
+      <div class="table-wrap">
+        <table id="detail-table">
+          <thead>
+            <tr><th>日期</th><th>星期</th><th>预测销量</th><th>置信下限</th><th>置信上限</th><th>累计预测</th><th>库存推演</th><th>动作</th></tr>
+          </thead>
+          <tbody>
+            <tr id="table-empty"><td colspan="8" style="text-align:center;color:#94a3b8;padding:24px;">点击「生成预测」查看明细</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+/* ===== 零食有鸣 · 需求预测工作台 · Mock 逻辑版 ===== */
+
+const $ = id => document.getElementById(id);
+const el = html => { const d=document.createElement('div'); d.innerHTML=html; return d.firstElementChild; };
+
+/* ---------- Mock 元数据 ---------- */
+const REGIONS = {
+  '西南战区': ['成都','重庆','贵阳','昆明'],
+  '华南战区': ['广州','深圳','南宁','海口'],
+  '华中战区': ['长沙','武汉','南昌'],
+  '华东战区': ['杭州','南京','合肥','福州'],
+  '西北战区': ['西安','兰州','乌鲁木齐'],
+  '华北战区': ['郑州','济南','石家庄']
+};
+
+function genStores(){
+  const out=[]; let idx=1;
+  for(const [region,cities] of Object.entries(REGIONS)){
+    for(const city of cities){
+      const n = 3;
+      for(let i=1;i<=n;i++){
+        out.push({store_id:`ST${String(idx).padStart(4,'0')}`, store_name:`零食有鸣${city}${String(i).padStart(3,'0')}店`, city, region});
+        idx++;
+      }
+    }
+  }
+  return out;
+}
+const STORES = genStores();
+
+// 品类参数：保质期(天) → 库存周转天数范围、安全库存天数、订货提前期、在途库存范围
+const CAT_PARAMS = {
+  '短保':  {stockDaysMin:0.5, stockDaysMax:1.0, safetyDays:0.5, leadTime:1, inTransitMin:0, inTransitMax:0},
+  '低温':  {stockDaysMin:2.0, stockDaysMax:4.0, safetyDays:1.0, leadTime:2, inTransitMin:1, inTransitMax:3},
+  '常规':  {stockDaysMin:5.0, stockDaysMax:10.0, safetyDays:1.5, leadTime:3, inTransitMin:2, inTransitMax:5},
+  '日用':  {stockDaysMin:10.0, stockDaysMax:20.0, safetyDays:7.0, leadTime:7, inTransitMin:5, inTransitMax:10},
+  '个护':  {stockDaysMin:10.0, stockDaysMax:20.0, safetyDays:7.0, leadTime:7, inTransitMin:5, inTransitMax:10},
+  '文具':  {stockDaysMin:10.0, stockDaysMax:20.0, safetyDays:7.0, leadTime:7, inTransitMin:5, inTransitMax:10},
+};
+function getCatParams(sku){
+  if(sku.cat==='短保') return {...CAT_PARAMS['短保'], group:'短保'};
+  if(sku.cat==='低温') return {...CAT_PARAMS['低温'], group:'低温'};
+  if(sku.cat==='常规') return {...CAT_PARAMS['常规'], group:'常规'};
+  if(sku.cat==='日用') return {...CAT_PARAMS['日用'], group:'日用'};
+  if(sku.cat==='个护') return {...CAT_PARAMS['个护'], group:'个护'};
+  return {...CAT_PARAMS['文具'], group:'文具'};
+}
+
+const SKUS = [
+  // 短保（日配）
+  {sku_id:'SKU_F_001', sku_name:'全麦三明治150g', cat:'短保', subcat:'烘焙', cost:3.5, price:6.8, life:1, is_pb:true},
+  {sku_id:'SKU_F_002', sku_name:'照烧鸡腿饭团', cat:'短保', subcat:'鲜食', cost:4.0, price:7.5, life:1, is_pb:true},
+  {sku_id:'SKU_F_003', sku_name:'葡式蛋挞2枚装', cat:'短保', subcat:'烘焙', cost:2.8, price:5.0, life:1, is_pb:false},
+  {sku_id:'SKU_F_004', sku_name:'金枪鱼三明治', cat:'短保', subcat:'烘焙', cost:4.5, price:8.8, life:1, is_pb:true},
+  {sku_id:'SKU_F_005', sku_name:'日式土豆沙拉', cat:'短保', subcat:'鲜食', cost:3.0, price:5.8, life:2, is_pb:false},
+  {sku_id:'SKU_F_006', sku_name:'香煎鸡胸肉沙拉', cat:'短保', subcat:'鲜食', cost:5.0, price:9.8, life:3, is_pb:false},
+  // 低温
+  {sku_id:'SKU_L_001', sku_name:'低温鲜牛奶950ml', cat:'低温', subcat:'鲜奶', cost:8.0, price:12.8, life:7, is_pb:false},
+  {sku_id:'SKU_L_002', sku_name:'有鸣严选酸奶200g', cat:'低温', subcat:'酸奶', cost:3.5, price:6.0, life:21, is_pb:true},
+  {sku_id:'SKU_L_003', sku_name:'草莓味酸奶', cat:'低温', subcat:'酸奶', cost:3.0, price:5.5, life:21, is_pb:false},
+  {sku_id:'SKU_L_004', sku_name:'希腊酸奶135g', cat:'低温', subcat:'酸奶', cost:4.0, price:7.5, life:14, is_pb:false},
+  {sku_id:'SKU_L_005', sku_name:'黑椒牛柳便当', cat:'低温', subcat:'冷藏便当', cost:8.5, price:15.8, life:5, is_pb:false},
+  // 常规
+  {sku_id:'SKU_H_001', sku_name:'醇悦冰红茶500ml', cat:'常规', subcat:'茶饮料', cost:1.8, price:3.0, life:180, is_pb:false},
+  {sku_id:'SKU_H_002', sku_name:'老坛酸菜牛肉面', cat:'常规', subcat:'方便面', cost:2.5, price:4.5, life:180, is_pb:false},
+  {sku_id:'SKU_H_003', sku_name:'双汇火腿肠35g×10', cat:'常规', subcat:'肉制品', cost:6.0, price:9.9, life:120, is_pb:false},
+  {sku_id:'SKU_H_004', sku_name:'有鸣严选薯片原味', cat:'常规', subcat:'膨化食品', cost:3.2, price:5.5, life:270, is_pb:true},
+  {sku_id:'SKU_H_006', sku_name:'元气森林气泡水', cat:'常规', subcat:'碳酸饮料', cost:3.0, price:5.0, life:270, is_pb:false},
+  {sku_id:'SKU_H_007', sku_name:'恰恰每日坚果', cat:'常规', subcat:'坚果炒货', cost:5.5, price:8.9, life:240, is_pb:false},
+  {sku_id:'SKU_H_008', sku_name:'有鸣严选猪肉脯', cat:'常规', subcat:'肉脯', cost:4.0, price:6.8, life:180, is_pb:true},
+  {sku_id:'SKU_H_009', sku_name:'青岛啤酒500ml', cat:'常规', subcat:'啤酒', cost:3.5, price:6.0, life:180, is_pb:false},
+  {sku_id:'SKU_H_010', sku_name:'和路雪可爱多', cat:'常规', subcat:'冰淇淋', cost:4.0, price:6.5, life:180, is_pb:false},
+  {sku_id:'SKU_H_011', sku_name:'海天酱油500ml', cat:'常规', subcat:'调味品', cost:5.0, price:8.5, life:540, is_pb:false},
+  // 日用百货
+  {sku_id:'SKU_D_001', sku_name:'维达超韧抽纸', cat:'日用', subcat:'纸品', cost:8.0, price:12.9, life:999, is_pb:false},
+  {sku_id:'SKU_D_002', sku_name:'稳健医疗口罩10只', cat:'日用', subcat:'防护用品', cost:3.0, price:5.0, life:999, is_pb:false},
+  // 美妆个护
+  {sku_id:'SKU_B_001', sku_name:'云南白药牙膏', cat:'个护', subcat:'口腔护理', cost:8.0, price:14.9, life:999, is_pb:false},
+  {sku_id:'SKU_B_002', sku_name:'欧莱雅洗面奶小样', cat:'个护', subcat:'护肤小样', cost:5.0, price:9.9, life:999, is_pb:false},
+  // 文具小百
+  {sku_id:'SKU_W_001', sku_name:'晨光中性笔0.5mm', cat:'文具', subcat:'书写工具', cost:1.0, price:2.0, life:999, is_pb:false},
+  {sku_id:'SKU_W_002', sku_name:'南孚5号电池4粒', cat:'文具', subcat:'电池', cost:6.0, price:9.9, life:999, is_pb:false},
+];
+
+/* ---------- 日期工具 ---------- */
+function fmtDate(d){ return d.getFullYear()+'-'+`${d.getMonth()+1}`.padStart(2,'0')+'-'+`${d.getDate()}`.padStart(2,'0'); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function getYesterday(){ const t=new Date(); t.setDate(t.getDate()-1); t.setHours(0,0,0,0); return t; }
+function getToday(){ const t=new Date(); t.setHours(0,0,0,0); return t; }
+function isHoliday(dt){
+  const m=dt.getMonth()+1, day=dt.getDate();
+  // 2026年国庆 10.1-10.7
+  if(m===10 && day>=1 && day<=7) return {name:'国庆', factor:1.8};
+  // 2026年中秋 9.25（假设）
+  if(m===9 && day===25) return {name:'中秋', factor:1.5};
+  return null;
+}
+/* 周Pattern：不同品类方向相反；非食品无显著规律 */
+function weekdayFactor(dt, cat){
+  const w=dt.getDay(); // 0=Sun
+  if(cat==='短保'){
+    // 短保日配：工作日早餐场景高，周末在家吃低
+    if(w===1) return 1.18; // Mon 返工高峰
+    if(w>=2 && w<=5) return 1.12; // Tue-Fri
+    if(w===6) return 0.78; // Sat
+    return 0.72; // Sun
+  }
+  if(cat==='低温'){
+    // 低温乳品：周末家庭采购高，周中自提平稳
+    if(w===6) return 1.22; // Sat
+    if(w===0) return 1.18; // Sun
+    if(w===1) return 0.88; // Mon
+    return 0.95; // Tue-Fri
+  }
+  if(cat==='常规'){
+    // 常规零食/饮料：周末囤货休闲高，周一节后低谷
+    if(w===6) return 1.32; // Sat
+    if(w===0) return 1.28; // Sun
+    if(w===1) return 0.82; // Mon 节后低谷
+    return 0.90; // Tue-Fri
+  }
+  // 日用/个护/文具：无显著周Pattern
+  return 1.0;
+}
+
+/* 季节性乘数：不同品类在不同月份有差异（模拟历史同期） */
+function seasonalFactor(dt, subcat){
+  const m = dt.getMonth()+1;
+  // 饮料类：夏季高峰
+  if(subcat==='茶饮料' || subcat==='碳酸饮料'){
+    if(m>=6 && m<=8) return 1.35; // 夏季高峰
+    if(m===5 || m===9) return 1.15;
+    if(m>=12 || m<=2) return 0.70; // 冬季低谷
+    return 0.90;
+  }
+  // 啤酒：夏季强高峰
+  if(subcat==='啤酒'){
+    if(m>=6 && m<=8) return 1.50; // 夏季强高峰
+    if(m===5 || m===9) return 1.20;
+    if(m>=12 || m<=2) return 0.60; // 冬季低谷
+    return 0.85;
+  }
+  // 冰淇淋：夏季强高峰
+  if(subcat==='冰淇淋'){
+    if(m>=6 && m<=8) return 1.60; // 夏季极强高峰
+    if(m===5 || m===9) return 1.25;
+    if(m>=11 || m<=3) return 0.40; // 冬季极低谷
+    return 0.80;
+  }
+  // 膨化/零食/肉脯：全年平稳，春节前置高峰
+  if(subcat==='膨化食品' || subcat==='坚果炒货' || subcat==='肉脯'){
+    if(m===1) return 1.50; // 春节前置
+    if(m===2) return 1.20; // 春节延续
+    if(m===9) return 1.15; // 中秋
+    if(m>=6 && m<=8) return 0.90; // 夏季略低
+    return 1.0;
+  }
+  // 方便面/肉制品/调味品：冬季略高
+  if(subcat==='方便面' || subcat==='肉制品' || subcat==='调味品'){
+    if(m>=12 || m<=2) return 1.15;
+    if(m>=6 && m<=8) return 0.85;
+    return 1.0;
+  }
+  // 低温乳品：夏季冰饮需求高
+  if(subcat==='鲜奶' || subcat==='酸奶' || subcat==='冷藏便当'){
+    if(m>=6 && m<=8) return 1.25;
+    if(m>=12 || m<=2) return 0.85;
+    return 1.0;
+  }
+  // 烘焙/鲜食（短保）：全年平稳，9月开学季略高
+  if(subcat==='烘焙' || subcat==='鲜食'){
+    if(m===9) return 1.12; // 开学季
+    if(m>=6 && m<=8) return 0.95; // 暑假略低
+    return 1.0;
+  }
+  // 日用/个护/文具：极弱季节性，仅文具开学季有微弱波动
+  if(subcat==='书写工具' || subcat==='电池'){
+    if(m===9) return 1.15; // 开学季
+    return 1.0;
+  }
+  // 纸品/防护用品/口腔护理/护肤小样：全年平稳
+  return 1.0;
+}
+
+/* ---------- 销量生成引擎（带真实业务逻辑） ---------- */
+function seededRandom(seed){
+  // mulberry32: 确定性伪随机，相同 seed 产生相同序列
+  return function(){
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+}
+
+/* 生成历史销量：按品类决定参考天数，叠加周Pattern+季节性+节庆 */
+function generateHistory(store, sku, endDate=getYesterday()){
+  // 不同品类参考不同天数的历史数据；非食品120天
+  const REF_DAYS = {'短保':30, '低温':60, '常规':90, '日用':120, '个护':120, '文具':120};
+  const days = REF_DAYS[sku.cat] || 60;
+  const history=[];
+  const baseMap = {
+    茶饮料:18, 方便面:12, 肉制品:10, 膨化食品:22, 碳酸饮料:20, 坚果炒货:8, 肉脯:9,
+    啤酒:15, 冰淇淋:10, 调味品:6,
+    纸品:8, 防护用品:5, 口腔护理:7, 护肤小样:4,
+    书写工具:12, 电池:6,
+    低温乳品:14, 鲜奶:14, 酸奶:14, 冷藏便当:10,
+    烘焙:15, 鲜食:12
+  };
+  const base = baseMap[sku.subcat] || 10;
+  const seedBase = store.store_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
+                   + sku.sku_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) * 1000;
+  const rng = seededRandom(seedBase);
+  const storeFactor = 0.8 + rng()*0.4;
+  const skuFactor = sku.is_pb ? 0.7 : 1.0;
+
+  for(let i=days-1;i>=0;i--){
+    const d = addDays(endDate, -i);
+    const hol = isHoliday(d);
+    const wf = weekdayFactor(d, sku.cat);
+    const sf = seasonalFactor(d, sku.subcat);
+    const hf = hol ? hol.factor : 1.0;
+    const demand = Math.round(base * storeFactor * skuFactor * wf * sf * hf * (0.85 + rng()*0.3));
+    const stockout = rng() < 0.02 ? Math.floor(demand * 0.3) : 0;
+    const actual = demand - stockout;
+    history.push({date:d, dateStr:fmtDate(d), demand, actual, holiday:hol?.name||null, wf, sf});
+  }
+  return history;
+}
+
+/* 生成去年同期数据（仅食品类用）：取当前日期往前推365天的同期 */
+function generateYoY(store, sku, endDate=getYesterday()){
+  // 非食品不需要去年同期
+  if(sku.cat==='日用' || sku.cat==='个护' || sku.cat==='文具') return null;
+  const days = sku.cat==='短保' ? 30 : sku.cat==='低温' ? 60 : 90;
+  const yoyEnd = addDays(endDate, -365);
+  const yoy = [];
+  const baseMap = {
+    茶饮料:18, 方便面:12, 肉制品:10, 膨化食品:22, 碳酸饮料:20, 坚果炒货:8, 肉脯:9,
+    啤酒:15, 冰淇淋:10, 调味品:6,
+    低温乳品:14, 鲜奶:14, 酸奶:14, 冷藏便当:10,
+    烘焙:15, 鲜食:12
+  };
+  const base = baseMap[sku.subcat] || 10;
+  const seedBase = store.store_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
+                   + sku.sku_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) * 1000;
+  const rng = seededRandom(seedBase + 3333);
+  const storeFactor = 0.8 + rng()*0.4;
+  const skuFactor = sku.is_pb ? 0.7 : 1.0;
+  const yoyEnvFactor = 0.92 + rng()*0.16;
+
+  for(let i=days-1;i>=0;i--){
+    const d = addDays(yoyEnd, -i);
+    const hol = isHoliday(d);
+    const wf = weekdayFactor(d, sku.cat);
+    const sf = seasonalFactor(d, sku.subcat);
+    const hf = hol ? hol.factor : 1.0;
+    const demand = Math.round(base * storeFactor * skuFactor * wf * sf * hf * yoyEnvFactor * (0.85 + rng()*0.3));
+    const stockout = rng() < 0.02 ? Math.floor(demand * 0.3) : 0;
+    yoy.push({date:d, dateStr:fmtDate(d), actual: demand - stockout});
+  }
+  return yoy;
+}
+
+/* ---------- SES 预测 ---------- */
+function forecastSES(history, horizon, sku, yoyData=null){
+  const alpha = 0.5;
+  const values = history.map(h=>h.actual);
+  let smooth = values[0];
+  const fitted = [null];
+  for(let i=1;i<values.length;i++){
+    fitted.push(smooth); // 预测当天前，只使用之前的数据
+    smooth = alpha * values[i] + (1-alpha) * smooth;
+  }
+  const residuals = values.slice(1).map((v,i)=>v - fitted[i+1]);
+  const meanRes = residuals.reduce((a,b)=>a+b,0)/residuals.length;
+  const variance = residuals.reduce((a,b)=>a+b*b,0)/residuals.length - meanRes*meanRes;
+  const sigma = Math.sqrt(Math.max(variance, 0.01));
+
+  const lastDate = history[history.length-1].date;
+  const forecast = [];
+  let baseLevel = smooth;
+
+  // 常规品：计算历史同期修正系数（去年同期同月均值 / 今年近期均值）
+  let yoyAdjust = 1.0;
+  if(sku.cat==='常规' && yoyData && yoyData.length>0){
+    const yoyRecent = yoyData.slice(-30);
+    const yoyAvg = yoyRecent.reduce((a,b)=>a+b.actual,0) / yoyRecent.length;
+    const recentAvg = values.slice(-30).reduce((a,b)=>a+b,0) / Math.min(30, values.length);
+    if(recentAvg > 0){
+      yoyAdjust = 0.7 + 0.3 * (yoyAvg / recentAvg); // 30%权重参考去年同期
+      yoyAdjust = Math.max(0.85, Math.min(1.15, yoyAdjust)); // 限制在0.85~1.15
+    }
+  }
+
+  for(let h=1;h<=horizon;h++){
+    const d = addDays(lastDate, h);
+    const wf = weekdayFactor(d, sku.cat);
+    const recent = history.slice(-28);
+    const historicalFactors = recent.map(x => weekdayFactor(x.date, sku.cat) * seasonalFactor(x.date, sku.subcat) * (isHoliday(x.date)?.factor || 1));
+    const avgFactor = historicalFactors.reduce((a,b)=>a+b,0) / historicalFactors.length;
+    const sf = seasonalFactor(d, sku.subcat);
+    const hol = isHoliday(d);
+    const hf = hol ? hol.factor : 1.0;
+    // 基线已包含近期周期因素，先归一化再应用目标日期因子
+    const point = baseLevel * wf * sf * hf / avgFactor * yoyAdjust;
+    const se = sigma * Math.sqrt(h);
+    forecast.push({
+      date:d, dateStr:fmtDate(d),
+      qty: Math.max(0, Math.round(point)),
+      lower: Math.max(0, Math.round(point - 1.645*se)),
+      upper: Math.round(point + 1.645*se),
+      holiday: hol?.name||null,
+      yoyAdjust: sku.cat==='常规' ? yoyAdjust : null
+    });
+  }
+  return {forecast, sigma, fitted, yoyAdjust: sku.cat==='常规' ? yoyAdjust : null};
+}
+
+/* ---------- SMA 简单移动平均（非食品类用） ---------- */
+function forecastSMA(history, horizon, sku){
+  const values = history.map(h=>h.actual);
+  // 取最近30天均值作为基线
+  const window = Math.min(30, values.length);
+  const recent = values.slice(-window);
+  const avg = recent.reduce((a,b)=>a+b,0) / window;
+  // 拟合值：用30天滚动均值
+  const fitted = [];
+  for(let i=0;i<values.length;i++){
+    const start = Math.max(0, i-window);
+    const slice = values.slice(start, i);
+    fitted.push(slice.length ? slice.reduce((a,b)=>a+b,0) / slice.length : null);
+  }
+  // 标准差（用于置信区间）
+  const mean = values.reduce((a,b)=>a+b,0) / values.length;
+  const variance = values.reduce((a,b)=>a+b*b,0)/values.length - mean*mean;
+  const sigma = Math.sqrt(Math.max(variance, 0.01));
+
+  const lastDate = history[history.length-1].date;
+  const forecast = [];
+  for(let h=1;h<=horizon;h++){
+    const d = addDays(lastDate, h);
+    const hol = isHoliday(d);
+    const hf = hol ? hol.factor : 1.0;
+    // 非食品无周 Pattern；按日期应用模拟季节和节庆系数。
+    const recentFactors = history.slice(-window).map(x=>seasonalFactor(x.date, sku.subcat) * (isHoliday(x.date)?.factor || 1));
+    const avgFactor = recentFactors.reduce((a,b)=>a+b,0) / recentFactors.length;
+    const point = avg * seasonalFactor(d, sku.subcat) * hf / avgFactor;
+    const se = sigma * Math.sqrt(h);
+    forecast.push({
+      date:d, dateStr:fmtDate(d),
+      qty: Math.max(0, Math.round(point)),
+      lower: Math.max(0, Math.round(point - 1.645*se)),
+      upper: Math.round(point + 1.645*se),
+      holiday: hol?.name||null,
+      yoyAdjust: null
+    });
+  }
+  return {forecast, sigma, fitted, yoyAdjust: null};
+}
+
+/* ---------- 回测准确率 ---------- */
+function backtest(history, fitted, horizon=14){
+  // 用最后 horizon 天的 fitted(前14天SES拟合) vs actual
+  const start = history.length - horizon;
+  if(start < 0) return 0;
+  let mapeSum=0, cnt=0;
+  for(let i=start;i<history.length;i++){
+    const actual = history[i].actual;
+    const pred = fitted[i]; // SES 在训练期的 one-step ahead 拟合值
+    if(actual===0 || pred == null) continue;
+    mapeSum += Math.abs((actual - pred)/actual);
+    cnt++;
+  }
+  return cnt ? Math.max(0, 1 - mapeSum/cnt) : 0;
+}
+
+function paramsLead(sku){ return getCatParams(sku).leadTime; }
+
+/* ---------- 建议订货量 ---------- */
+function suggestQty(forecast, sigma, currentStock, inTransit=0, catParams=null, sku=null){
+  // 预测期用于观察；订货仅覆盖提前期及下次订货周期。
+  const reviewDays = sku.cat === '短保' ? 1 : sku.cat === '低温' ? 3 : sku.cat === '常规' ? 7 : 14;
+  const coverageDays = sku.cat === '短保' ? Math.min(sku.life, reviewDays) : Math.min(forecast.length, paramsLead(sku) + reviewDays);
+  const totalDemand = forecast.slice(0, coverageDays).reduce((a,b)=>a+b.qty,0);
+  const params = catParams || CAT_PARAMS['常规'];
+  const leadTime = params.leadTime;
+  const avgDaily = totalDemand / coverageDays;
+  const statSafety = 1.28 * sigma * Math.sqrt(leadTime);
+  const minSafety = avgDaily * params.safetyDays;
+  let safety = Math.round(Math.max(statSafety, minSafety));
+  // 短保品安全库存绝对不超过1天销量（保质期1天，卖不完就报损）
+  if(sku && sku.cat==='短保'){
+    safety = Math.min(safety, Math.round(avgDaily * 1.0));
+  }
+  const suggest = Math.max(0, totalDemand + safety - currentStock - inTransit);
+  return {totalDemand, safety, suggest, currentStock, inTransit, leadTime, coverageDays, reviewDays};
+}
+
+/* ---------- 业务解读生成 ---------- */
+function generateInsight(history, forecast, result, sku){
+  const lines=[];
+  const last7 = history.slice(-7).reduce((a,b)=>a+b.actual,0);
+  const prev7 = history.slice(-14,-7).reduce((a,b)=>a+b.actual,0);
+  const mom = prev7>0 ? (last7-prev7)/prev7 : 0;
+  lines.push(`近7天实际销量 ${last7} 件，较前7天 ${mom>0?'+'+(mom*100).toFixed(0)+'%':'-'+(Math.abs(mom)*100).toFixed(0)+'%'}，${Math.abs(mom)<0.1?'趋于平稳':mom>0?'呈上升趋势':'呈下降趋势'}。`);
+
+  const holDays = forecast.filter(f=>f.holiday);
+  if(holDays.length) lines.push(`预测期内包含 ${holDays[0].holiday}（${holDays.length}天），因子 ${isHoliday(holDays[0].date)?.factor}x，建议提前 ${Math.min(holDays.length,3)} 天备货。`);
+
+  if(result.suggest > 0) lines.push(`建议本次订货 ${result.suggest} 件，覆盖 ${result.coverageDays} 天需求；到货和在途按模拟提前期估算。`);
+  else if(result.suggest === 0) lines.push(`当前库存充足，本次无需补货，建议关注临期品消化。`);
+  else lines.push(`当前库存 ${result.currentStock} 件，在途 ${result.inTransit} 件。`);
+
+  if(sku.cat === '短保') lines.push(`⚠️ ${sku.sku_name} 为短保日配品（保质期 ${sku.life} 天），建议每日凌晨下单，到货当日上架当日清。`);
+  else if(sku.cat === '低温') lines.push(`⚠️ ${sku.sku_name} 为低温品（保质期 ${sku.life} 天），建议 2~3 天补一次，注意冷链到店时效。`);
+  else if(sku.cat === '日用' || sku.cat === '个护' || sku.cat === '文具') lines.push(`ℹ️ ${sku.sku_name} 为非食品类（保质期极长），安全库存可备7~14天销量，建议1~2周补一次货。`);
+
+  return lines;
+}
+
+/* ---------- 筛选器联动（全局函数，避免闭包问题） ---------- */
+function updateHorizon(){
+  const kSel = $('f-sku');
+  const sku = SKUS.find(s=>s.sku_id===kSel.value);
+  if(sku){
+    const HORIZON_MAP = {'短保':7, '低温':14, '常规':30};
+    const h = HORIZON_MAP[sku.cat] || 14;
+    $('f-horizon').value = h;
+    $('f-horizon-display').textContent = h + ' 天';
+  }
+}
+function fillSKU(){
+  const catSel = $('f-cat'), kSel = $('f-sku');
+  const cat = catSel.value;
+  const list = cat==='all' ? SKUS : SKUS.filter(s=>s.cat===cat);
+  kSel.innerHTML = list.map(s=>`<option value="${s.sku_id}">${s.sku_name}${s.is_pb?' [PB]':''}</option>`).join('');
+  if(list.length){ kSel.value = list[0].sku_id; }
+  updateHorizon();
+}
+function fillCity(){
+  const rSel = $('f-region'), cSel = $('f-city');
+  const cities = REGIONS[rSel.value] || [];
+  cSel.innerHTML = cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+  if(cities.length) cSel.value = cities[0];
+  fillStore();
+}
+function fillStore(){
+  const cSel = $('f-city'), sSel = $('f-store');
+  const city = cSel.value;
+  const list = STORES.filter(s=>s.city===city);
+  if(list.length){
+    sSel.innerHTML = list.map(s=>`<option value="${s.store_id}">${s.store_name}</option>`).join('');
+    sSel.value = list[0].store_id;
+  } else {
+    sSel.innerHTML = '<option>无门店</option>';
+  }
+}
+function bindFilterEvents(){
+  $('f-region').addEventListener('change', ()=>{ fillCity(); clearResults(); });
+  $('f-city').addEventListener('change', ()=>{ fillStore(); clearResults(); });
+  $('f-store').addEventListener('change', clearResults);
+  $('f-cat').addEventListener('change', ()=>{ fillSKU(); clearResults(); });
+  $('f-sku').addEventListener('change', ()=>{ updateHorizon(); clearResults(); });
+}
+
+/* ---------- UI 初始化 ---------- */
+function initSelectors(){
+  const rSel=$('f-region');
+  const regions = Object.keys(REGIONS);
+  rSel.innerHTML = regions.map(r=>`<option value="${r}">${r}</option>`).join('');
+  rSel.value = regions[0];
+  fillCity();
+  fillSKU();
+}
+
+/* 筛选器切换后清除当前结果，等待用户重新点击"生成预测" */
+function clearResults(){
+  console.log('[clearResults] 执行清空');
+  // KPI 卡
+  $('k-suggest').textContent = '--';
+  $('k-accuracy').textContent = '--';
+  $('k-stock').textContent = '--';
+  $('k-safety').textContent = '--';
+  $('k-intransit').textContent = '--';
+  // 因子面板
+  $('f-trend').textContent = '趋势：--';
+  $('f-week').textContent = '周 Pattern：--';
+  $('f-holiday').textContent = '节庆因子：--';
+  $('f-volatility').textContent = '波动系数(CV)：--';
+  $('f-spoilage').textContent = '模拟报损率：--';
+  $('f-refwindow').textContent = '参考窗口：--';
+  $('f-yoy').textContent = '历史同期修正：--';
+  // 预测方法重置
+  $('method-list').innerHTML = '<li>请选择条件后查看当前 SKU 预测方法</li>';
+  // 图表标题历史天数重置
+  $('hist-label').textContent = '--';
+  $('h-label').textContent = '--';
+  $('detail-horizon').textContent = '逐日拆解';
+  // 图表：彻底销毁实例，恢复空白提示
+  if(chartInst){ chartInst.dispose(); chartInst = null; }
+  const mc = $('main-chart');
+  mc.innerHTML = '<div id="chart-empty" style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:14px;">请选择条件后点击「生成预测」</div>';
+  // 明细表：恢复空白提示行
+  $('detail-table').querySelector('tbody').innerHTML = '<tr id="table-empty"><td colspan="8" style="text-align:center;color:#94a3b8;padding:24px;">点击「生成预测」查看明细</td></tr>';
+  // 业务提示
+  $('alert-content').innerHTML = '<div style="color:#94a3b8;">筛选条件已变更，请重新生成预测。</div>';
+  // 缓存清空
+  lastForecast = null;
+  lastResult = null;
+  lastStore = null;
+  lastSku = null;
+}
+
+let chartInst = null;
+let lastForecast = null;
+let lastResult = null;
+let lastStore = null;
+let lastSku = null;
+
+function exportCSV(){
+  if(!lastForecast || !lastResult || !lastStore || !lastSku){
+    alert('请先生成预测');
+    return;
+  }
+  const headers = ['门店ID','门店名称','城市','战区','SKU_ID','SKU名称','品类','品类组','日期','星期','预测销量','置信下限','置信上限','累计预测','库存推演','当前库存','在途库存','动作'];
+  const effStock = lastResult.currentStock;
+  let csvCum = 0;
+  // 预计算临界点
+  let tc = 0, csvLow = -1, csvOut = -1;
+  for(let i=0;i<lastForecast.length;i++){
+    tc += lastForecast[i].qty;
+    const p = effStock + (i + 1 >= lastResult.leadTime ? lastResult.suggest + lastResult.inTransit : 0) - tc;
+    if(csvLow===-1 && p<=lastResult.safety && p>0) csvLow = i;
+    if(csvOut===-1 && p<=0) { csvOut = i; break; }
+  }
+  const rows = lastForecast.map((f, idx)=>{
+    const d = f.date;
+    const week = ['日','一','二','三','四','五','六'][d.getDay()];
+    csvCum += f.qty;
+    const stockProj = effStock + (idx + 1 >= lastResult.leadTime ? lastResult.suggest + lastResult.inTransit : 0) - csvCum;
+    let action;
+    if(idx === 0) action = '建议本次下单 ' + lastResult.suggest + ' 件';
+    else if(stockProj <= 0) action = '库存告急，检查到货时间';
+    else if(stockProj <= lastResult.safety) action = '临近补货线（建议及时补货）';
+    else action = csvLow > idx ? '正常消耗（预计 ' + (csvLow - idx) + ' 天后临近安全线）' : '正常消耗';
+    return [lastStore.store_id, lastStore.store_name, lastStore.city, lastStore.region,
+            lastSku.sku_id, lastSku.sku_name, lastSku.cat, getCatParams(lastSku).group,
+            f.dateStr, '周'+week, f.qty, f.lower, f.upper, csvCum, stockProj, lastResult.currentStock, lastResult.inTransit, action];
+  });
+  const csv = [headers.join(','), ...rows.map(r=>r.map(v=>`"${v}"`).join(','))].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `预测_${lastStore.store_name}_${lastSku.sku_name}_${lastForecast.length}天.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function run(){
+  let store = STORES.find(s=>s.store_id===$('f-store').value);
+  const sku = SKUS.find(s=>s.sku_id===$('f-sku').value);
+  const horizon = +$('f-horizon').value;
+  // 兜底：如果门店未选中，默认成都001店
+  if(!store){
+    store = STORES.find(s=>s.store_id==='ST0001') || STORES[0];
+    if(store && $('f-store').querySelector(`option[value="${store.store_id}"]`)){
+      $('f-store').value = store.store_id;
+    }
+  }
+  if(!sku || !store) return; // 真没有就放弃
+  // 图表标题根据品类显示不同历史天数
+  const histDays = {'短保':30, '低温':60, '常规':90, '日用':120, '个护':120, '文具':120}[sku.cat] || 60;
+  $('h-label').textContent = horizon;
+  $('detail-horizon').textContent = `未来 ${horizon} 天逐日拆解`;
+  $('hist-label').textContent = histDays;
+
+  // 生成数据：不同品类参考不同天数历史
+  const history = generateHistory(store, sku);
+  // 常规品额外生成去年同期数据用于对比
+  let yoyData = null;
+  if(sku.cat==='常规'){
+    yoyData = generateYoY(store, sku);
+  }
+  // 食品类用SES，非食品类用SMA简单移动平均
+  let forecastResult, accuracy;
+  if(sku.cat==='日用' || sku.cat==='个护' || sku.cat==='文具'){
+    forecastResult = forecastSMA(history, horizon, sku);
+    accuracy = backtest(history, forecastResult.fitted, 14);
+  } else {
+    forecastResult = forecastSES(history, horizon, sku, yoyData);
+    accuracy = backtest(history, forecastResult.fitted, 14);
+  }
+  const {forecast, sigma, fitted, yoyAdjust} = forecastResult;
+
+  // 品类参数决定库存策略
+  const params = getCatParams(sku);
+  const avgDaily = history.slice(-30).reduce((a,b)=>a+b.actual,0)/30;
+
+  // 当前库存
+  const stockSeed = store.store_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
+                    + sku.sku_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) * 2000;
+  const stockRng = seededRandom(stockSeed);
+  const stockDays = params.stockDaysMin + stockRng() * (params.stockDaysMax - params.stockDaysMin);
+  const currentStock = Math.max(0, Math.round(avgDaily * stockDays));
+
+  // 在途库存
+  const transitRng = seededRandom(stockSeed + 9999);
+  const inTransit = Math.round(params.inTransitMin + transitRng() * (params.inTransitMax - params.inTransitMin));
+
+  const result = suggestQty(forecast, sigma, currentStock, inTransit, params, sku);
+  // 缓存供导出使用
+  lastForecast = forecast; lastResult = result; lastStore = store; lastSku = sku;
+
+  // KPI 卡
+  $('k-suggest').textContent = result.suggest + ' 件';
+  $('k-accuracy').textContent = (accuracy*100).toFixed(1) + '%';
+  $('k-stock').textContent = result.currentStock + ' 件';
+  $('k-safety').textContent = result.safety + ' 件';
+  $('k-intransit').textContent = result.inTransit + ' 件';
+
+  // 图表
+  const allDates = history.map(h=>h.dateStr).concat(forecast.map(f=>f.dateStr));
+  const histValues = history.map(h=>h.actual);
+  const fcValues = new Array(history.length).fill(null).concat(forecast.map(f=>f.qty));
+  const upperValues = new Array(history.length).fill(null).concat(forecast.map(f=>f.upper));
+  const lowerValues = new Array(history.length).fill(null).concat(forecast.map(f=>f.lower));
+  // 去年同期数据（仅常规品）：日期对齐到今年时间轴
+  let yoySeries = null;
+  if(sku.cat==='常规' && yoyData){
+    const yoyValues = yoyData.map(h=>h.actual);
+    const yoyAligned = yoyValues.concat(new Array(forecast.length).fill(null));
+    yoySeries = {name:'去年同期',type:'line',data:yoyAligned,smooth:true,symbol:'none',lineStyle:{color:'#94a3b8',width:1.5,type:'dotted'},itemStyle:{color:'#94a3b8'}};
+  }
+
+  // 隐藏空白提示
+  const emptyChart = $('chart-empty');
+  if(emptyChart) emptyChart.style.display = 'none';
+  const emptyTable = $('table-empty');
+  if(emptyTable) emptyTable.style.display = 'none';
+
+  if(chartInst) chartInst.dispose();
+  chartInst = echarts.init($('main-chart'));
+  chartInst.resize();
+  const series = [
+    {name:'历史销量',type:'line',data:histValues,smooth:true,symbol:'none',lineStyle:{color:'#3b82f6',width:2},itemStyle:{color:'#3b82f6'}},
+    {name:'预测需求',type:'line',data:fcValues,smooth:true,symbol:'none',lineStyle:{color:'#f59e0b',width:2.5,type:'dashed'},itemStyle:{color:'#f59e0b'}},
+    {name:'置信下限',type:'line',data:lowerValues,symbol:'none',lineStyle:{opacity:0},stack:'ci'},
+    {name:'90%预测区间',type:'line',data:upperValues.map((v,i)=>v == null ? null : v-lowerValues[i]),symbol:'none',silent:true,lineStyle:{opacity:0},areaStyle:{color:'rgba(245,158,11,.16)'},stack:'ci'},
+    {name:'置信上限',type:'line',data:upperValues,symbol:'none',lineStyle:{opacity:0}}
+  ];
+  if(yoySeries) series.push(yoySeries);
+  // 安全库存展示在指标卡，不与日销量共用坐标轴。
+  const legendData = ['历史销量','预测需求','置信上限','置信下限'];
+  if(sku.cat==='常规') legendData.splice(2, 0, '去年同期');
+
+  chartInst.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:'rgba(255,255,255,.96)',borderColor:'#e2e8f0',textStyle:{color:'#0f172a'}},
+    grid:{left:50,right:20,top:30,bottom:30},
+    xAxis:{type:'category',data:allDates,axisLine:{lineStyle:{color:'#374151'}},axisLabel:{color:'#9ca3af',fontSize:11}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#1f2937'}},axisLabel:{color:'#9ca3af'}},
+    legend:{data:legendData,top:0,textStyle:{color:'#9ca3af',fontSize:11}},
+    series,
+    animationDuration:800
+  });
+
+  // 因子面板：按品类动态展示
+  const trend = history.slice(-7).reduce((a,b)=>a+b.actual,0) - history.slice(-14,-7).reduce((a,b)=>a+b.actual,0);
+  $('f-trend').innerHTML = `趋势 <span>${trend>0?'↑':'↓'} ${Math.abs(trend).toFixed(1)} 件/周</span>`;
+  // 周Pattern：非食品无显著规律
+  const wpMap = {'短保':'工作日 +12~18%，周末 -22~28%','低温':'周末 +18~22%，周中 -5~12%','常规':'周末 +25~35%，周一 -15~18%','日用':'无显著规律','个护':'无显著规律','文具':'无显著规律'};
+  $('f-week').innerHTML = `周 Pattern <span>${wpMap[sku.cat]}</span>`;
+  const holFactor = forecast.find(f=>f.holiday)?.date ? isHoliday(forecast.find(f=>f.holiday).date) : null;
+  $('f-holiday').innerHTML = `节庆因子 <span>${holFactor ? holFactor.name+' '+holFactor.factor+'x' : '无近期节庆'}</span>`;
+  const cv = (sigma / (avgDaily||1)).toFixed(2);
+  $('f-volatility').innerHTML = `波动系数(CV) <span>${cv}</span>`;
+  // 报损率：非食品极低
+  const spoilSeed = stockSeed + 7777;
+  const spoilRng = seededRandom(spoilSeed);
+  const spoilRange = sku.cat==='短保' ? [3,5] : sku.cat==='低温' ? [1,2] : sku.cat==='常规' ? [0.3,0.8] : [0.05,0.2];
+  const spoilRate = (spoilRange[0] + spoilRng() * (spoilRange[1]-spoilRange[0])).toFixed(1);
+  $('f-spoilage').innerHTML = `模拟报损率 <span>${spoilRate}%</span>`;
+  // 参考窗口 & 历史同期
+  const refWin = {'短保':'30天','低温':'60天','常规':'90天 + 去年同期','日用':'120天历史 / 30天均值','个护':'120天历史 / 30天均值','文具':'120天历史 / 30天均值'}[sku.cat];
+  $('f-refwindow').innerHTML = `参考窗口 <span>${refWin}</span>`;
+  if(sku.cat==='常规' && yoyAdjust){
+    $('f-yoy').innerHTML = `历史同期修正 <span>${yoyAdjust>=1?'+'+(yoyAdjust-1).toFixed(2):'-'+Math.abs(yoyAdjust-1).toFixed(2)}x</span>`;
+  } else {
+    $('f-yoy').innerHTML = `历史同期修正 <span>不适用</span>`;
+  }
+
+  // 预测方法动态渲染
+  const methodMap = {
+    '短保': [
+      '<li><b>参考窗口</b> 最近 30 天（保质期1天，历史同期无参考价值）</li>',
+      '<li><b>基线模型</b> SES（α=0.5）</li>',
+      '<li><b>周Pattern</b> 工作日 +12~18%，周末 -22~28%（早餐场景）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 弱：9月开学季及暑假调整</li>',
+      '<li><b>安全库存</b> max(1.28σ×√1, 日均×0.5天)，绝对上限1天销量</li>',
+      '<li><b>订货频率</b> 每日凌晨下单，当日上架当日清</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ],
+    '低温': [
+      '<li><b>参考窗口</b> 最近 60 天</li>',
+      '<li><b>基线模型</b> SES（α=0.5）</li>',
+      '<li><b>周Pattern</b> 周末 +18~22%，周中 -5~12%（家庭采购）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 夏季冰饮需求+25%（6~8月）</li>',
+      '<li><b>安全库存</b> max(1.28σ×√2, 日均×1.0天)</li>',
+      '<li><b>订货频率</b> 2~3天补一次，注意冷链到店时效</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ],
+    '常规': [
+      '<li><b>参考窗口</b> 最近90天 + 去年同期最近30天</li>',
+      '<li><b>基线模型</b> SES（α=0.5）+ 历史同期同月修正（权重30%）</li>',
+      '<li><b>周Pattern</b> 周末 +25~35%，周一 -15~18%（囤货+节后低谷）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 按商品细分类型使用模拟季节系数</li>',
+      '<li><b>安全库存</b> max(1.28σ×√3, 日均×1.5天)</li>',
+      '<li><b>订货频率</b> 按预测周期批量下单</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ],
+    '日用': [
+      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
+      '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 忽略（全年平稳）</li>',
+      '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
+      '<li><b>订货频率</b> 1~2周补一次</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ],
+    '个护': [
+      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
+      '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 忽略（全年平稳）</li>',
+      '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
+      '<li><b>订货频率</b> 1~2周补一次</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ],
+    '文具': [
+      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
+      '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
+      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>季节性</b> 弱（9月开学季+15%）</li>',
+      '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
+      '<li><b>订货频率</b> 1~2周补一次</li>',
+      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+    ]
+  };
+  $('method-list').innerHTML = methodMap[sku.cat].join('');
+
+  // 业务提示
+  const insights = generateInsight(history, forecast, result, sku);
+  $('alert-content').innerHTML = insights.map(l=>`<div>${l}</div>`).join('');
+
+  // 明细表
+  const tbody = $('detail-table').querySelector('tbody');
+  // 模拟：本次订单和在途库存均在提前期到货，当天到货后销售。
+  const effectiveStock = result.currentStock;
+  let cumQty = 0;
+
+  // 先预计算每天的库存推演，找到关键临界点
+  const stockProjs = [];
+  let tempCum = 0;
+  let lowIdx = -1;   // 首次跌破安全库存
+  let outIdx = -1;   // 首次库存告急（<=0）
+  for(let i=0;i<forecast.length;i++){
+    tempCum += forecast[i].qty;
+    const proj = effectiveStock + (i + 1 >= result.leadTime ? result.suggest + result.inTransit : 0) - tempCum;
+    stockProjs.push(proj);
+    if(lowIdx===-1 && proj <= result.safety && proj > 0) lowIdx = i;
+    if(outIdx===-1 && proj <= 0) outIdx = i;
+  }
+
+  tbody.innerHTML = forecast.map((f, idx)=>{
+    const d = f.date;
+    const week = ['日','一','二','三','四','五','六'][d.getDay()];
+    cumQty += f.qty;
+    const stockProj = stockProjs[idx];
+
+    let action;
+    if(idx === 0){
+      action = '建议本次下单 ' + result.suggest + ' 件';
+    } else if(stockProj <= 0){
+      action = '⚠️ 库存告急，检查到货时间';
+    } else if(stockProj <= result.safety){
+      action = '临近补货线（建议及时补货）';
+    } else {
+      // 正常消耗时，提示距离安全线还有多少天
+      const daysToLow = lowIdx === -1 || lowIdx <= idx ? null : (lowIdx - idx);
+      action = daysToLow !== null ? '正常消耗（预计 ' + daysToLow + ' 天后临近安全线）' : '正常消耗';
+    }
+
+    return `<tr><td>${f.dateStr}</td><td>周${week}</td><td><b>${f.qty}</b></td><td>${f.lower}</td><td>${f.upper}</td><td>${cumQty}</td><td>${stockProj >= 0 ? stockProj : '负'+Math.abs(stockProj)}</td><td>${action}</td></tr>`;
+  }).join('');
+}
+
+/* ---------- 启动 ---------- */
+function initApp(){
+  initSelectors();
+  bindFilterEvents();
+  $('f-sku').selectedIndex = 0;
+  $('btn-run').onclick = run;
+  $('btn-export').onclick = exportCSV;
+  // 更新数据日期显示（T+1 = 昨天）
+  const yest = getYesterday();
+  const dd = $('data-date');
+  if(dd){
+    dd.textContent = '数据日期: ' + yest.getFullYear()+'-'+String(yest.getMonth()+1).padStart(2,'0')+'-'+String(yest.getDate()).padStart(2,'0') + '（T+1）';
+  }
+  // 页面初始为空白状态，等待用户点击「生成预测」
+  clearResults();
+}
+
+// 确保 echarts 加载完成后再初始化（CDN 可能异步延迟）
+if(typeof echarts !== 'undefined'){
+  initApp();
+} else {
+  let checks = 0;
+  const t = setInterval(()=>{
+    checks++;
+    if(typeof echarts !== 'undefined'){
+      clearInterval(t);
+      initApp();
+    }
+    if(checks > 50){ clearInterval(t); document.body.insertAdjacentHTML('afterbegin','<p style="padding:12px;color:#b91c1c">图表组件加载失败，请检查 lib/echarts.min.js 是否存在。</p>'); }
+  }, 100);
+}
+
+// 窗口大小变化时重绘
+window.addEventListener('resize', ()=>{ if(chartInst) chartInst.resize(); });
+
+</script>
+</body>
+</html>
