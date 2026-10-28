@@ -42,6 +42,7 @@ button.primary{background:var(--brand);color:#fff;border:none;font-weight:600;cu
 button.primary:hover{filter:brightness(.95)}
 button.ghost{background:transparent;color:var(--sub);border:1px solid var(--border);font-weight:500;cursor:pointer;padding:0 16px}
 button.ghost:hover{color:var(--text);border-color:var(--muted)}
+button:disabled{opacity:.5;cursor:not-allowed}
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),#fb923c);opacity:.85}
@@ -76,6 +77,7 @@ button.ghost:hover{color:var(--text);border-color:var(--muted)}
 .tooltip-wrap{position:relative;display:inline-block;cursor:help}
 .tooltip-trigger{padding:0;border:0;cursor:help;width:20px;height:20px;border-radius:50%;background:var(--muted);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
 .tooltip-text{display:none;width:780px;background:#fff;color:var(--text);border:1px solid #000;border-radius:0;padding:16px;position:absolute;z-index:100;top:28px;left:-100px;font-size:11px;line-height:1.6}
+.tooltip-text{max-width:calc(100vw - 32px);max-height:70vh;overflow:auto}
 .tooltip-wrap:hover .tooltip-text,.tooltip-wrap:focus-within .tooltip-text{display:block}
 .tooltip-text h5{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--brand)}
 .tooltip-text table{width:100%;font-size:10px;border-collapse:collapse;margin-top:8px}
@@ -86,6 +88,8 @@ button.ghost:hover{color:var(--text);border-color:var(--muted)}
 .table-section h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
 .table-section h3 small{color:var(--muted);font-weight:400}
 .table-wrap{overflow-x:auto}
+.result-context{margin:0 0 14px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#7c3f12;font-size:12px;line-height:1.7}
+.table-note{margin:0 0 12px;color:var(--sub);font-size:12px;line-height:1.6}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;color:var(--sub);font-weight:500;padding:10px 8px;border-bottom:1px solid var(--border);white-space:nowrap;background:#f8fafc}
 td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--sub);white-space:nowrap}
@@ -93,6 +97,8 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .status-good{color:var(--good)}.status-warn{color:var(--warn)}.status-bad{color:var(--bad)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+@media(max-width:900px){.sidebar{width:160px;flex-shrink:0}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-section{grid-template-columns:minmax(0,1fr)}.chart-box{min-height:360px}.tooltip-text{left:0}}
+@media(max-width:600px){.layout{display:block;height:auto;overflow:visible}.sidebar{width:auto;padding:12px 0}.brand{padding:0 16px 8px}nav{display:flex;overflow-x:auto}nav a{white-space:nowrap;padding:8px 12px}.foot{display:none}main{padding:18px 16px;overflow:visible}header{align-items:flex-start;gap:8px;flex-direction:column}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi{padding:12px}.k-value{font-size:22px}.tooltip-text{position:fixed;left:16px;top:80px;width:calc(100vw - 32px)}}
 
 
 </style>
@@ -174,7 +180,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
         <div id="f-horizon-display" style="height:36px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--sub);padding:0 12px;font-size:13px;display:flex;align-items:center;">14 天</div>
         <input type="hidden" id="f-horizon" value="14">
       </div>
-      <button id="btn-run" class="primary">生成预测</button><button id="btn-export" class="ghost" title="下载当前店×SKU的预测明细CSV">导出当前预测</button>
+      <button id="btn-run" class="primary">生成预测</button><button id="btn-export" class="ghost" title="请先生成预测" disabled>导出当前预测</button>
     </section>
 
     <!-- 核心指标卡 -->
@@ -207,6 +213,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </section>
 
     <!-- 主图表区 -->
+    <div class="result-context" id="result-context" hidden></div>
     <section class="chart-section">
       <div class="chart-left">
         <div class="chart-header">
@@ -247,6 +254,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     <!-- 明细表 -->
     <section class="table-section">
       <h3>预测明细 <small id="detail-horizon">逐日拆解</small></h3>
+      <p class="table-note">库存推演仅计入当前库存、已有在途和本次建议订单，未模拟后续补货；负数表示累计供需缺口。到货日期按模拟提前期估算。</p>
       <div class="table-wrap">
         <table id="detail-table">
           <thead>
@@ -739,7 +747,10 @@ function initSelectors(){
 
 /* 筛选器切换后清除当前结果，等待用户重新点击"生成预测" */
 function clearResults(){
-  console.log('[clearResults] 执行清空');
+  $('btn-export').disabled = true;
+  $('btn-export').title = '请先生成预测';
+  $('result-context').hidden = true;
+  $('result-context').textContent = '';
   // KPI 卡
   $('k-suggest').textContent = '--';
   $('k-accuracy').textContent = '--';
@@ -767,7 +778,7 @@ function clearResults(){
   // 明细表：恢复空白提示行
   $('detail-table').querySelector('tbody').innerHTML = '<tr id="table-empty"><td colspan="8" style="text-align:center;color:#94a3b8;padding:24px;">点击「生成预测」查看明细</td></tr>';
   // 业务提示
-  $('alert-content').innerHTML = '<div style="color:#94a3b8;">筛选条件已变更，请重新生成预测。</div>';
+  $('alert-content').innerHTML = '<div style="color:#94a3b8;">请选择条件后点击「生成预测」。</div>';
   // 缓存清空
   lastForecast = null;
   lastResult = null;
@@ -781,37 +792,39 @@ let lastResult = null;
 let lastStore = null;
 let lastSku = null;
 
+// 同一份库存推演用于页面与导出，避免两处口径漂移。
+function buildDetailRows(forecast, result){
+  let cumulative = 0;
+  const stocks = forecast.map((f, idx)=>{
+    cumulative += f.qty;
+    return result.currentStock + (idx + 1 >= result.leadTime ? result.suggest + result.inTransit : 0) - cumulative;
+  });
+  let cum = 0;
+  return forecast.map((f, idx)=>{
+    cum += f.qty;
+    const stock = stocks[idx];
+    const lowAhead = stocks.findIndex((value, i)=>i > idx && value <= result.safety);
+    let action;
+    if(idx === 0) action = result.suggest ? `建议本次下单 ${result.suggest} 件` : '本次无需下单';
+    else if(stock <= 0) action = idx + 1 > result.coverageDays ? '未模拟后续补货，预计出现缺口' : '预计库存不足，检查到货时间';
+    else if(stock <= result.safety) action = '临近安全库存，关注下次补货';
+    else action = lowAhead >= 0 ? `预计 ${lowAhead - idx} 天后临近安全库存` : '正常消耗';
+    return {...f, week:'周'+['日','一','二','三','四','五','六'][f.date.getDay()], cumulative: cum, stock, action};
+  });
+}
+
 function exportCSV(){
   if(!lastForecast || !lastResult || !lastStore || !lastSku){
     alert('请先生成预测');
     return;
   }
   const headers = ['门店ID','门店名称','城市','战区','SKU_ID','SKU名称','品类','品类组','日期','星期','预测销量','置信下限','置信上限','累计预测','库存推演','当前库存','在途库存','动作'];
-  const effStock = lastResult.currentStock;
-  let csvCum = 0;
-  // 预计算临界点
-  let tc = 0, csvLow = -1, csvOut = -1;
-  for(let i=0;i<lastForecast.length;i++){
-    tc += lastForecast[i].qty;
-    const p = effStock + (i + 1 >= lastResult.leadTime ? lastResult.suggest + lastResult.inTransit : 0) - tc;
-    if(csvLow===-1 && p<=lastResult.safety && p>0) csvLow = i;
-    if(csvOut===-1 && p<=0) { csvOut = i; break; }
-  }
-  const rows = lastForecast.map((f, idx)=>{
-    const d = f.date;
-    const week = ['日','一','二','三','四','五','六'][d.getDay()];
-    csvCum += f.qty;
-    const stockProj = effStock + (idx + 1 >= lastResult.leadTime ? lastResult.suggest + lastResult.inTransit : 0) - csvCum;
-    let action;
-    if(idx === 0) action = '建议本次下单 ' + lastResult.suggest + ' 件';
-    else if(stockProj <= 0) action = '库存告急，检查到货时间';
-    else if(stockProj <= lastResult.safety) action = '临近补货线（建议及时补货）';
-    else action = csvLow > idx ? '正常消耗（预计 ' + (csvLow - idx) + ' 天后临近安全线）' : '正常消耗';
+  const rows = buildDetailRows(lastForecast, lastResult).map(f=>{
     return [lastStore.store_id, lastStore.store_name, lastStore.city, lastStore.region,
             lastSku.sku_id, lastSku.sku_name, lastSku.cat, getCatParams(lastSku).group,
-            f.dateStr, '周'+week, f.qty, f.lower, f.upper, csvCum, stockProj, lastResult.currentStock, lastResult.inTransit, action];
+            f.dateStr, f.week, f.qty, f.lower, f.upper, f.cumulative, f.stock, lastResult.currentStock, lastResult.inTransit, f.action];
   });
-  const csv = [headers.join(','), ...rows.map(r=>r.map(v=>`"${v}"`).join(','))].join('\n');
+  const csv = [headers.join(','), ...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -877,6 +890,10 @@ function run(){
   const result = suggestQty(forecast, sigma, currentStock, inTransit, params, sku);
   // 缓存供导出使用
   lastForecast = forecast; lastResult = result; lastStore = store; lastSku = sku;
+  $('btn-export').disabled = false;
+  $('btn-export').title = '下载当前店×SKU的预测明细CSV';
+  $('result-context').hidden = false;
+  $('result-context').textContent = `${store.store_name} · ${sku.sku_name}｜数据截至 ${fmtDate(history[history.length-1].date)}｜预测 ${forecast[0].dateStr} 至 ${forecast[forecast.length-1].dateStr}｜本次订货覆盖前 ${result.coverageDays} 天预测 ${result.totalDemand} 件；模拟提前期 ${result.leadTime} 天。`;
 
   // KPI 卡
   $('k-suggest').textContent = result.suggest + ' 件';
@@ -1026,43 +1043,8 @@ function run(){
 
   // 明细表
   const tbody = $('detail-table').querySelector('tbody');
-  // 模拟：本次订单和在途库存均在提前期到货，当天到货后销售。
-  const effectiveStock = result.currentStock;
-  let cumQty = 0;
-
-  // 先预计算每天的库存推演，找到关键临界点
-  const stockProjs = [];
-  let tempCum = 0;
-  let lowIdx = -1;   // 首次跌破安全库存
-  let outIdx = -1;   // 首次库存告急（<=0）
-  for(let i=0;i<forecast.length;i++){
-    tempCum += forecast[i].qty;
-    const proj = effectiveStock + (i + 1 >= result.leadTime ? result.suggest + result.inTransit : 0) - tempCum;
-    stockProjs.push(proj);
-    if(lowIdx===-1 && proj <= result.safety && proj > 0) lowIdx = i;
-    if(outIdx===-1 && proj <= 0) outIdx = i;
-  }
-
-  tbody.innerHTML = forecast.map((f, idx)=>{
-    const d = f.date;
-    const week = ['日','一','二','三','四','五','六'][d.getDay()];
-    cumQty += f.qty;
-    const stockProj = stockProjs[idx];
-
-    let action;
-    if(idx === 0){
-      action = '建议本次下单 ' + result.suggest + ' 件';
-    } else if(stockProj <= 0){
-      action = '⚠️ 库存告急，检查到货时间';
-    } else if(stockProj <= result.safety){
-      action = '临近补货线（建议及时补货）';
-    } else {
-      // 正常消耗时，提示距离安全线还有多少天
-      const daysToLow = lowIdx === -1 || lowIdx <= idx ? null : (lowIdx - idx);
-      action = daysToLow !== null ? '正常消耗（预计 ' + daysToLow + ' 天后临近安全线）' : '正常消耗';
-    }
-
-    return `<tr><td>${f.dateStr}</td><td>周${week}</td><td><b>${f.qty}</b></td><td>${f.lower}</td><td>${f.upper}</td><td>${cumQty}</td><td>${stockProj >= 0 ? stockProj : '负'+Math.abs(stockProj)}</td><td>${action}</td></tr>`;
+  tbody.innerHTML = buildDetailRows(forecast, result).map(f=>{
+    return `<tr><td>${f.dateStr}</td><td>${f.week}</td><td><b>${f.qty}</b></td><td>${f.lower}</td><td>${f.upper}</td><td>${f.cumulative}</td><td>${f.stock >= 0 ? f.stock : '负'+Math.abs(f.stock)}</td><td>${f.action}</td></tr>`;
   }).join('');
 }
 
