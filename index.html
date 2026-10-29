@@ -271,6 +271,15 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <tr><td>基线</td><td>SES</td><td>SES</td><td>SES + 同期参考</td><td>节日周期基线</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td></tr><tr><td>周内</td><td>工作日偏高</td><td>周末偏高</td><td>周末偏高</td><td>周末偏高</td><td>不设置</td><td>不设置</td><td>不设置</td></tr><tr><td>季节</td><td>开学季、暑假</td><td>夏季</td><td>按商品细分</td><td>节日销售窗口</td><td>同期参考</td><td>同期参考</td><td>开学季、同期参考</td></tr><tr><td>节庆</td><td>节日客流</td><td>节日采购</td><td>节日采购</td><td>节前上升、节后回落</td><td>节日因素</td><td>节日因素</td><td>节日因素</td></tr><tr><td>促销活动</td><td>短期促销</td><td>组合促销</td><td>折扣活动</td><td>节前活动</td><td>集中采购</td><td>新品推广</td><td>开学促销</td></tr><tr><td>库存与缺货</td><td>缺货识别</td><td>库存与临期</td><td>区分缺货与需求下降</td><td>节前供货</td><td>低销量与缺货</td><td>低销量与缺货</td><td>活动前供货</td></tr><tr><td>业务决策</td><td>效期与报损</td><td>冷链与临期</td><td>库存周转</td><td>上市、销售与退场</td><td>库存占用</td><td>商品差异</td><td>开学季供货</td></tr>
     </tbody></table></div></section>
     <section><h3>04 · 冷启动策略</h3><p>历史不足时，以相似对象建立基线；自身数据积累后，逐步提高自身销量的权重。</p><div class="strategy-table"><table><thead><tr><th>场景</th><th>参考对象</th><th>预测思路</th></tr></thead><tbody><tr><td>新品无历史</td><td>同门店同品类商品</td><td>以相似商品销量建立初始基线</td></tr><tr><td>新门店无历史</td><td>同城市相似门店</td><td>参考同 SKU 的销量</td></tr><tr><td>节日限定新品</td><td>同类节日商品及往年同期</td><td>参考节前、节中与节后变化</td></tr><tr><td>已有少量历史</td><td>自身销量 + 相似对象</td><td>按有效天数逐步增加自身权重</td></tr><tr><td>历史充足</td><td>本门店本 SKU</td><td>使用自身历史进行预测</td></tr></tbody></table></div></section>
+    <section><h3>05 · 安全库存与订货量</h3><p>提前期是等待到货的时间；安全库存是应对需求波动等不确定性而保留的数量。</p>
+      <div class="strategy-table"><table><thead><tr><th>项目</th><th>当前计算口径</th></tr></thead><tbody>
+        <tr><td>统计安全库存</td><td>1.28 × σ × √提前期；σ 表示模型使用的销量波动量</td></tr>
+        <tr><td>品类库存下限</td><td>覆盖期预测日均销量 × 品类安全库存天数</td></tr>
+        <tr><td>安全库存</td><td>取统计安全库存与品类库存下限的较大值，四舍五入；短保商品再限制为不超过 1 天预测日均销量</td></tr>
+      </tbody></table></div>
+      <p class="strategy-callout"><strong>建议订货量 = max（0，订货覆盖期预测需求 + 安全库存 − 当前库存 − 在途库存）</strong></p>
+      <p>例如：覆盖期预测需求 100 件，安全库存 20 件，当前库存 50 件，在途 10 件，则建议订货 60 件。订货覆盖期与预测期分开计算。</p>
+    </section>
   </div>
 </dialog>
 
