@@ -38,6 +38,7 @@ select{cursor:pointer}
 #f-sku{min-width:200px;width:240px}
 #f-horizon{min-width:80px;width:100px}
 select:focus{border-color:var(--brand)}
+button:focus-visible,select:focus-visible{outline:2px solid #f97316;outline-offset:2px}
 button.primary{background:var(--brand);color:#fff;border:none;font-weight:600;cursor:pointer;padding:0 18px}
 button.primary:hover{filter:brightness(.95)}
 button.ghost{background:transparent;color:var(--sub);border:1px solid var(--border);font-weight:500;cursor:pointer;padding:0 16px}
@@ -78,7 +79,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .tooltip-trigger{padding:0;border:0;cursor:help;width:20px;height:20px;border-radius:50%;background:var(--muted);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
 .tooltip-text{display:none;width:780px;background:#fff;color:var(--text);border:1px solid #000;border-radius:0;padding:16px;position:absolute;z-index:100;top:28px;left:-100px;font-size:11px;line-height:1.6}
 .tooltip-text{max-width:calc(100vw - 32px);max-height:70vh;overflow:auto}
-.tooltip-wrap:hover .tooltip-text,.tooltip-wrap:focus-within .tooltip-text{display:block}
+#strategy-dialog{border:0;border-radius:12px;padding:0;width:min(1440px,96vw);max-width:none;max-height:90vh;margin:auto;box-shadow:0 20px 70px #0f172a44;color:var(--text)}
+#strategy-dialog::backdrop{background:rgba(15,23,42,.48)}
+.strategy-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:22px 26px 16px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:2}
+.strategy-head h2{font-size:20px}.strategy-head p,.strategy-body p{color:var(--sub);font-size:13px;margin-top:5px}
+#strategy-close{font-size:24px;line-height:1;width:36px;padding:0;cursor:pointer}
+.strategy-body{padding:4px 26px 24px}.strategy-body section{padding:18px 0;border-bottom:1px solid var(--border)}.strategy-body section:last-child{border:0}
+.strategy-body h3{font-size:15px;color:var(--brand)}.strategy-table{overflow-x:auto;margin-top:10px}.strategy-table table{min-width:750px}.strategy-table th,.strategy-table td{padding:9px 10px;border:1px solid var(--border);white-space:normal;vertical-align:top}.strategy-table th{background:#f8fafc;font-weight:600}.strategy-table td:first-child{font-weight:600;color:var(--text);white-space:nowrap}.strategy-body .strategy-callout{padding:10px;background:#fff7ed;border-radius:6px;color:#92400e;margin-top:10px}
 .tooltip-text h5{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--brand)}
 .tooltip-text table{width:100%;font-size:10px;border-collapse:collapse;margin-top:8px}
 .tooltip-text th,.tooltip-text td{padding:5px 6px;border:1px solid #e5e7eb;text-align:left;vertical-align:top}
@@ -128,27 +135,10 @@ tr:hover td{background:rgba(0,0,0,.02)}
     <header>
       <div class="title-wrap">
         <h1>店 × SKU 需求预测</h1>
-        <div class="tooltip-wrap">
-          <button type="button" class="tooltip-trigger" aria-label="查看预测策略说明">ⓘ</button>
-          <div class="tooltip-text">
-            <h5>零食有鸣需求预测策略体系</h5>
-            <table>
-              <tr><th>维度</th><th>短保日配</th><th>低温食品</th><th>常规食品</th><th>日用百货</th><th>美妆个护</th><th>文具小百</th></tr>
-              <tr><td><b>保质期</b></td><td>≤3天</td><td>7~21天</td><td>>21天</td><td>无/极长</td><td>无/极长</td><td>无/极长</td></tr>
-              <tr><td><b>参考数据</b></td><td>最近30天</td><td>最近60天</td><td>90天+去年同期</td><td>120天历史 / 30天均值</td><td>120天移动平均</td><td>120天移动平均</td></tr>
-              <tr><td><b>周Pattern</b></td><td>工作日高<br>周末低</td><td>周末高<br>周中平稳</td><td>周末高<br>周一低</td><td>无显著规律</td><td>无显著规律</td><td>无显著规律</td></tr>
-              <tr><td><b>季节性</b></td><td>弱（开学季及暑假）</td><td>弱（夏+25%）</td><td>强（按品类）</td><td>极弱</td><td>极弱</td><td>弱（开学季+15%）</td></tr>
-              <tr><td><b>节庆因子</b></td><td colspan="6">演示规则：国庆 1.8 倍、中秋 1.5 倍；所有品类相同</td></tr>
-              <tr><td><b>安全库存</b></td><td>≤1天销量</td><td>1~2天销量</td><td>3~5天销量</td><td>7~14天销量</td><td>7~14天销量</td><td>7~14天销量</td></tr>
-              <tr><td><b>订货频率</b></td><td>每日凌晨</td><td>2~3天</td><td>按周期批量</td><td>1~2周</td><td>1~2周</td><td>1~2周</td></tr>
-              <tr><td><b>冷启动</b></td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td><td>待接入</td></tr>
-            </table>
-            <div style="margin-top:8px;font-size:11px;color:#6b7280">短保品安全库存≤1天销量；常规品按1.28σ×√lead_time计算；非食品类用SMA简单移动平均</div>
-          </div>
-        </div>
+        <button type="button" class="tooltip-trigger" id="strategy-open" aria-label="查看预测策略说明" aria-haspopup="dialog">ⓘ</button>
       </div>
       <div class="meta">
-        <span class="badge">演示环境 · Mock 数据</span>
+        <span class="badge">模拟数据 · Mock</span>
         <span id="data-date">数据日期: 计算中…</span>
       </div>
     </header>
@@ -193,7 +183,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <div class="kpi">
         <div class="k-label">预测准确率（回测）</div>
         <div class="k-value" id="k-accuracy">--</div>
-        <div class="k-desc">最近14天逐日单步预测 vs 实际销量</div>
+        <div class="k-desc">最近14天基线模型逐日单步回测</div>
       </div>
       <div class="kpi">
         <div class="k-label">当前库存</div>
@@ -268,6 +258,22 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </section>
   </main>
 </div>
+<dialog id="strategy-dialog" aria-labelledby="strategy-title">
+  <div class="strategy-head"><div><h2 id="strategy-title">门店 × SKU 需求预测策略说明</h2><p>从时间概念、品类策略到需求因素，逐步理解预测与补货。</p></div><button type="button" id="strategy-close" aria-label="关闭策略说明">×</button></div>
+  <div class="strategy-body">
+    <section><h3>01 · 时间概念</h3><p>预测期用于观察未来需求，订货决策结合库存、到货与订货节奏计算。</p><div class="strategy-table"><table><thead><tr><th>概念</th><th>含义</th><th>示例</th></tr></thead><tbody>
+      <tr><td>预测期</td><td>观察未来需求的时间范围</td><td>未来 30 天逐日需求</td></tr><tr><td>历史观察期</td><td>近期历史参考范围</td><td>最近 120 天</td></tr><tr><td>去年同期</td><td>参考上一年度相同时间段</td><td>去年同期及相关节日</td></tr><tr><td>订货间隔</td><td>两次订货决策之间的时间</td><td>每 14 天</td></tr><tr><td>订货提前期</td><td>从下单到商品可售的时间</td><td>7 天</td></tr><tr><td>订货覆盖期</td><td>本次订货参考的需求范围</td><td>提前期 7 天 + 订货间隔 14 天 ≈ 21 天</td></tr>
+    </tbody></table></div><p class="strategy-callout">预测期不等于一次订货量。短保商品还需考虑剩余效期、到货时点与报损。</p></section>
+    <section><h3>02 · 品类周期与补货</h3><p>按商品效期与补货节奏选择历史窗口和预测范围。</p><div class="strategy-table"><table><thead><tr><th>品类</th><th>参考效期</th><th>历史观察期</th><th>预测期</th><th>订货间隔</th><th>提前期</th><th>决策重点</th></tr></thead><tbody>
+      <tr><td>短保日配</td><td>1～3 天</td><td>30 天</td><td>7 天</td><td>每天</td><td>1 天</td><td>近期需求、报损</td></tr><tr><td>低温食品</td><td>5～21 天</td><td>60 天</td><td>14 天</td><td>3 天</td><td>2 天</td><td>约 5 天需求、冷链</td></tr><tr><td>常规食品</td><td>21 天以上</td><td>90 天 + 去年同期</td><td>30 天</td><td>7 天</td><td>3 天</td><td>约 10 天需求</td></tr><tr><td>节日限定食品</td><td>按 SKU 管理</td><td>90 天 + 去年同期</td><td>30 天</td><td>7 天</td><td>3 天</td><td>节前备货、节后退场</td></tr><tr><td>日用百货</td><td>约 2～5 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr><tr><td>美妆个护</td><td>约 2～3 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr><tr><td>文具小百</td><td>约 3～10 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr>
+    </tbody></table></div><p class="strategy-callout">效期以商品标识及具体 SKU 为准；预测范围和本次订货覆盖期分别管理。</p></section>
+    <section><h3>03 · 需求影响因素</h3><p>基线需求结合周内变化、季节、节庆及商品生命周期；促销、缺货及效期是后续可接入的决策因素。</p><div class="strategy-table"><table><thead><tr><th>因素</th><th>短保日配</th><th>低温食品</th><th>常规食品</th><th>节日限定食品</th><th>日用百货</th><th>美妆个护</th><th>文具小百</th></tr></thead><tbody>
+      <tr><td>基线</td><td>SES</td><td>SES</td><td>SES + 同期参考</td><td>节日周期基线</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td></tr><tr><td>周内</td><td>工作日偏高</td><td>周末偏高</td><td>周末偏高</td><td>周末偏高</td><td>不设置</td><td>不设置</td><td>不设置</td></tr><tr><td>季节</td><td>开学季、暑假</td><td>夏季</td><td>按商品细分</td><td>节日销售窗口</td><td>同期参考</td><td>同期参考</td><td>开学季、同期参考</td></tr><tr><td>节庆</td><td>节日客流</td><td>节日采购</td><td>节日采购</td><td>节前上升、节后回落</td><td>节日因素</td><td>节日因素</td><td>节日因素</td></tr><tr><td>业务决策</td><td>效期与报损</td><td>冷链与临期</td><td>库存周转</td><td>上市、销售与退场</td><td>库存占用</td><td>商品差异</td><td>开学季供货</td></tr>
+    </tbody></table></div></section>
+    <section><h3>04 · 冷启动策略</h3><p>历史不足时，以相似对象建立基线；自身数据积累后，逐步提高自身销量的权重。</p><div class="strategy-table"><table><thead><tr><th>场景</th><th>参考对象</th><th>预测思路</th></tr></thead><tbody><tr><td>新品无历史</td><td>同门店同品类商品</td><td>以相似商品销量建立初始基线</td></tr><tr><td>新门店无历史</td><td>同城市相似门店</td><td>参考同 SKU 的销量</td></tr><tr><td>节日限定新品</td><td>同类节日商品及往年同期</td><td>参考节前、节中与节后变化</td></tr><tr><td>已有少量历史</td><td>自身销量 + 相似对象</td><td>按有效天数逐步增加自身权重</td></tr><tr><td>历史充足</td><td>本门店本 SKU</td><td>使用自身历史进行预测</td></tr></tbody></table></div></section>
+  </div>
+</dialog>
+
 <script>
 /* ===== 零食有鸣 · 需求预测工作台 · Mock 逻辑版 ===== */
 
@@ -342,15 +348,16 @@ const SKUS = [
   {sku_id:'SKU_H_009', sku_name:'青岛啤酒500ml', cat:'常规', subcat:'啤酒', cost:3.5, price:6.0, life:180, is_pb:false},
   {sku_id:'SKU_H_010', sku_name:'和路雪可爱多', cat:'常规', subcat:'冰淇淋', cost:4.0, price:6.5, life:180, is_pb:false},
   {sku_id:'SKU_H_011', sku_name:'海天酱油500ml', cat:'常规', subcat:'调味品', cost:5.0, price:8.5, life:540, is_pb:false},
+  {sku_id:'SKU_H_012', sku_name:'中秋限定月饼礼盒', cat:'常规', subcat:'坚果炒货', cost:25, price:39.9, life:60, is_pb:false, holidayLimited:true},
   // 日用百货
-  {sku_id:'SKU_D_001', sku_name:'维达超韧抽纸', cat:'日用', subcat:'纸品', cost:8.0, price:12.9, life:999, is_pb:false},
-  {sku_id:'SKU_D_002', sku_name:'稳健医疗口罩10只', cat:'日用', subcat:'防护用品', cost:3.0, price:5.0, life:999, is_pb:false},
+  {sku_id:'SKU_D_001', sku_name:'维达超韧抽纸', cat:'日用', subcat:'纸品', cost:8.0, price:12.9, life:1095, is_pb:false},
+  {sku_id:'SKU_D_002', sku_name:'稳健医疗口罩10只', cat:'日用', subcat:'防护用品', cost:3.0, price:5.0, life:1095, is_pb:false},
   // 美妆个护
-  {sku_id:'SKU_B_001', sku_name:'云南白药牙膏', cat:'个护', subcat:'口腔护理', cost:8.0, price:14.9, life:999, is_pb:false},
-  {sku_id:'SKU_B_002', sku_name:'欧莱雅洗面奶小样', cat:'个护', subcat:'护肤小样', cost:5.0, price:9.9, life:999, is_pb:false},
+  {sku_id:'SKU_B_001', sku_name:'云南白药牙膏', cat:'个护', subcat:'口腔护理', cost:8.0, price:14.9, life:1095, is_pb:false},
+  {sku_id:'SKU_B_002', sku_name:'欧莱雅洗面奶小样', cat:'个护', subcat:'护肤小样', cost:5.0, price:9.9, life:730, is_pb:false},
   // 文具小百
-  {sku_id:'SKU_W_001', sku_name:'晨光中性笔0.5mm', cat:'文具', subcat:'书写工具', cost:1.0, price:2.0, life:999, is_pb:false},
-  {sku_id:'SKU_W_002', sku_name:'南孚5号电池4粒', cat:'文具', subcat:'电池', cost:6.0, price:9.9, life:999, is_pb:false},
+  {sku_id:'SKU_W_001', sku_name:'晨光中性笔0.5mm', cat:'文具', subcat:'书写工具', cost:1.0, price:2.0, life:1095, is_pb:false},
+  {sku_id:'SKU_W_002', sku_name:'南孚5号电池4粒', cat:'文具', subcat:'电池', cost:6.0, price:9.9, life:1825, is_pb:false},
 ];
 
 /* ---------- 日期工具 ---------- */
@@ -358,6 +365,16 @@ function fmtDate(d){ return d.getFullYear()+'-'+`${d.getMonth()+1}`.padStart(2,'
 function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
 function getYesterday(){ const t=new Date(); t.setDate(t.getDate()-1); t.setHours(0,0,0,0); return t; }
 function getToday(){ const t=new Date(); t.setHours(0,0,0,0); return t; }
+// 节日限定商品的销售窗口：节前上市、节中销售、节后退场。
+function festivalFactor(dt, sku){
+  if(!sku.holidayLimited) return 1;
+  const festival = new Date(dt.getFullYear(),8,25);
+  const diff = Math.round((Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate())-Date.UTC(festival.getFullYear(),festival.getMonth(),festival.getDate()))/86400000);
+  if(diff < -30 || diff > 7) return 0;
+  if(diff < -14) return .55;
+  if(diff <= 0) return 1.7;
+  return .25;
+}
 function isHoliday(dt){
   const m=dt.getMonth()+1, day=dt.getDate();
   // 2026年国庆 10.1-10.7
@@ -491,7 +508,7 @@ function generateHistory(store, sku, endDate=getYesterday()){
     const wf = weekdayFactor(d, sku.cat);
     const sf = seasonalFactor(d, sku.subcat);
     const hf = hol ? hol.factor : 1.0;
-    const demand = Math.round(base * storeFactor * skuFactor * wf * sf * hf * (0.85 + rng()*0.3));
+    const demand = Math.round(base * storeFactor * skuFactor * wf * sf * hf * festivalFactor(d,sku) * (0.85 + rng()*0.3));
     const stockout = rng() < 0.02 ? Math.floor(demand * 0.3) : 0;
     const actual = demand - stockout;
     history.push({date:d, dateStr:fmtDate(d), demand, actual, holiday:hol?.name||null, wf, sf});
@@ -501,36 +518,27 @@ function generateHistory(store, sku, endDate=getYesterday()){
 
 /* 生成去年同期数据（仅食品类用）：取当前日期往前推365天的同期 */
 function generateYoY(store, sku, endDate=getYesterday()){
-  // 非食品不需要去年同期
-  if(sku.cat==='日用' || sku.cat==='个护' || sku.cat==='文具') return null;
-  const days = sku.cat==='短保' ? 30 : sku.cat==='低温' ? 60 : 90;
-  const yoyEnd = addDays(endDate, -365);
-  const yoy = [];
-  const baseMap = {
-    茶饮料:18, 方便面:12, 肉制品:10, 膨化食品:22, 碳酸饮料:20, 坚果炒货:8, 肉脯:9,
-    啤酒:15, 冰淇淋:10, 调味品:6,
-    低温乳品:14, 鲜奶:14, 酸奶:14, 冷藏便当:10,
-    烘焙:15, 鲜食:12
-  };
-  const base = baseMap[sku.subcat] || 10;
-  const seedBase = store.store_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
-                   + sku.sku_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) * 1000;
-  const rng = seededRandom(seedBase + 3333);
-  const storeFactor = 0.8 + rng()*0.4;
-  const skuFactor = sku.is_pb ? 0.7 : 1.0;
-  const yoyEnvFactor = 0.92 + rng()*0.16;
+  const previous = new Date(endDate);
+  previous.setFullYear(previous.getFullYear()-1);
+  return generateHistory(store, sku, previous);
+}
 
-  for(let i=days-1;i>=0;i--){
-    const d = addDays(yoyEnd, -i);
-    const hol = isHoliday(d);
-    const wf = weekdayFactor(d, sku.cat);
-    const sf = seasonalFactor(d, sku.subcat);
-    const hf = hol ? hol.factor : 1.0;
-    const demand = Math.round(base * storeFactor * skuFactor * wf * sf * hf * yoyEnvFactor * (0.85 + rng()*0.3));
-    const stockout = rng() < 0.02 ? Math.floor(demand * 0.3) : 0;
-    yoy.push({date:d, dateStr:fmtDate(d), actual: demand - stockout});
-  }
-  return yoy;
+// 数据不足时，用同店同类或同城同 SKU 的历史补足，随有效天数增加自身权重。
+function coldStartHistory(store, sku, history, endDate=getYesterday()){
+  const valid = history.filter(x=>Number.isFinite(x.actual));
+  if(valid.length >= 30) return {history, source:'自身历史', ownDays:valid.length};
+  const similar = SKUS.find(x=>x.sku_id!==sku.sku_id && x.cat===sku.cat && x.subcat===sku.subcat && !x.holidayLimited);
+  const peerStore = STORES.find(x=>x.city===store.city && x.store_id!==store.store_id);
+  const peer = similar ? generateHistory(store,similar,endDate) : peerStore ? generateHistory(peerStore,sku,endDate) : [];
+  if(!peer.length) return {history, source:'无可比数据', ownDays:valid.length};
+  const peerAvg=peer.slice(-30).reduce((a,x)=>a+x.actual,0)/Math.min(peer.length,30);
+  const weight=Math.min(valid.length/30,1);
+  const ownAvg=valid.length ? valid.reduce((a,x)=>a+x.actual,0)/valid.length : peerAvg;
+  const level=peerAvg*(1-weight)+ownAvg*weight;
+  const days=Math.max(30,valid.length);
+  const generated=Array.from({length:days},(_,i)=>{const d=addDays(endDate,i-days+1);return {date:d,dateStr:fmtDate(d),actual:level,demand:level,holiday:null,estimated:true};});
+  valid.forEach((x,i)=>{generated[days-valid.length+i]=x;});
+  return {history:generated, source:similar?'同店同类商品':'同城相似门店', ownDays:valid.length};
 }
 
 /* ---------- SES 预测 ---------- */
@@ -574,7 +582,8 @@ function forecastSES(history, horizon, sku, yoyData=null){
     const hol = isHoliday(d);
     const hf = hol ? hol.factor : 1.0;
     // 基线已包含近期周期因素，先归一化再应用目标日期因子
-    const point = baseLevel * wf * sf * hf / avgFactor * yoyAdjust;
+    const seasonalBase = sku.holidayLimited ? Math.max(baseLevel, 10) : baseLevel;
+    const point = seasonalBase * wf * sf * hf / avgFactor * yoyAdjust * festivalFactor(d,sku);
     const se = sigma * Math.sqrt(h);
     forecast.push({
       date:d, dateStr:fmtDate(d),
@@ -589,7 +598,7 @@ function forecastSES(history, horizon, sku, yoyData=null){
 }
 
 /* ---------- SMA 简单移动平均（非食品类用） ---------- */
-function forecastSMA(history, horizon, sku){
+function forecastSMA(history, horizon, sku, yoyData=null){
   const values = history.map(h=>h.actual);
   // 取最近30天均值作为基线
   const window = Math.min(30, values.length);
@@ -609,6 +618,9 @@ function forecastSMA(history, horizon, sku){
 
   const lastDate = history[history.length-1].date;
   const forecast = [];
+  const yoyRecent = yoyData?.slice(-30) || [];
+  const yoyAvg = yoyRecent.length ? yoyRecent.reduce((a,x)=>a+x.actual,0)/yoyRecent.length : avg;
+  const yoyAdjust = avg > 0 ? Math.max(.85,Math.min(1.15,.7+.3*yoyAvg/avg)) : 1;
   for(let h=1;h<=horizon;h++){
     const d = addDays(lastDate, h);
     const hol = isHoliday(d);
@@ -616,7 +628,7 @@ function forecastSMA(history, horizon, sku){
     // 非食品无周 Pattern；按日期应用模拟季节和节庆系数。
     const recentFactors = history.slice(-window).map(x=>seasonalFactor(x.date, sku.subcat) * (isHoliday(x.date)?.factor || 1));
     const avgFactor = recentFactors.reduce((a,b)=>a+b,0) / recentFactors.length;
-    const point = avg * seasonalFactor(d, sku.subcat) * hf / avgFactor;
+    const point = avg * seasonalFactor(d, sku.subcat) * hf / avgFactor * yoyAdjust;
     const se = sigma * Math.sqrt(h);
     forecast.push({
       date:d, dateStr:fmtDate(d),
@@ -627,7 +639,7 @@ function forecastSMA(history, horizon, sku){
       yoyAdjust: null
     });
   }
-  return {forecast, sigma, fitted, yoyAdjust: null};
+  return {forecast, sigma, fitted, yoyAdjust};
 }
 
 /* ---------- 回测准确率 ---------- */
@@ -683,9 +695,9 @@ function generateInsight(history, forecast, result, sku){
   else if(result.suggest === 0) lines.push(`当前库存充足，本次无需补货，建议关注临期品消化。`);
   else lines.push(`当前库存 ${result.currentStock} 件，在途 ${result.inTransit} 件。`);
 
-  if(sku.cat === '短保') lines.push(`⚠️ ${sku.sku_name} 为短保日配品（保质期 ${sku.life} 天），建议每日凌晨下单，到货当日上架当日清。`);
+  if(sku.cat === '短保') lines.push(`⚠️ ${sku.sku_name} 为短保日配品（保质期 ${sku.life} 天），建议每日凌晨下单，到货结合剩余效期与到货时间补货。`);
   else if(sku.cat === '低温') lines.push(`⚠️ ${sku.sku_name} 为低温品（保质期 ${sku.life} 天），建议 2~3 天补一次，注意冷链到店时效。`);
-  else if(sku.cat === '日用' || sku.cat === '个护' || sku.cat === '文具') lines.push(`ℹ️ ${sku.sku_name} 为非食品类（保质期极长），安全库存可备7~14天销量，建议1~2周补一次货。`);
+  else if(sku.cat === '日用' || sku.cat === '个护' || sku.cat === '文具') lines.push(`ℹ️ ${sku.sku_name} 为非食品类（效期按商品属性管理），安全库存可备7~14天销量，建议每14天补一次货。`);
 
   return lines;
 }
@@ -695,8 +707,8 @@ function updateHorizon(){
   const kSel = $('f-sku');
   const sku = SKUS.find(s=>s.sku_id===kSel.value);
   if(sku){
-    const HORIZON_MAP = {'短保':7, '低温':14, '常规':30};
-    const h = HORIZON_MAP[sku.cat] || 14;
+    const HORIZON_MAP = {'短保':7, '低温':14, '常规':30, '日用':30, '个护':30, '文具':30};
+    const h = HORIZON_MAP[sku.cat] || 30;
     $('f-horizon').value = h;
     $('f-horizon-display').textContent = h + ' 天';
   }
@@ -705,7 +717,7 @@ function fillSKU(){
   const catSel = $('f-cat'), kSel = $('f-sku');
   const cat = catSel.value;
   const list = cat==='all' ? SKUS : SKUS.filter(s=>s.cat===cat);
-  kSel.innerHTML = list.map(s=>`<option value="${s.sku_id}">${s.sku_name}${s.is_pb?' [PB]':''}</option>`).join('');
+  kSel.innerHTML = list.map(s=>`<option value="${s.sku_id}">${s.sku_name}${s.is_pb?' [PB]':''}${s.holidayLimited?' [节日限定]':''}</option>`).join('');
   if(list.length){ kSel.value = list[0].sku_id; }
   updateHorizon();
 }
@@ -855,16 +867,14 @@ function run(){
   $('hist-label').textContent = histDays;
 
   // 生成数据：不同品类参考不同天数历史
-  const history = generateHistory(store, sku);
-  // 常规品额外生成去年同期数据用于对比
-  let yoyData = null;
-  if(sku.cat==='常规'){
-    yoyData = generateYoY(store, sku);
-  }
+  const originalHistory = generateHistory(store, sku);
+  const coldStart = coldStartHistory(store,sku,originalHistory);
+  const history = coldStart.history;
+  const yoyData = ['常规','日用','个护','文具'].includes(sku.cat) ? generateYoY(store, sku) : null;
   // 食品类用SES，非食品类用SMA简单移动平均
   let forecastResult, accuracy;
   if(sku.cat==='日用' || sku.cat==='个护' || sku.cat==='文具'){
-    forecastResult = forecastSMA(history, horizon, sku);
+    forecastResult = forecastSMA(history, horizon, sku, yoyData);
     accuracy = backtest(history, forecastResult.fitted, 14);
   } else {
     forecastResult = forecastSES(history, horizon, sku, yoyData);
@@ -910,7 +920,7 @@ function run(){
   const lowerValues = new Array(history.length).fill(null).concat(forecast.map(f=>f.lower));
   // 去年同期数据（仅常规品）：日期对齐到今年时间轴
   let yoySeries = null;
-  if(sku.cat==='常规' && yoyData){
+  if(yoyData){
     const yoyValues = yoyData.map(h=>h.actual);
     const yoyAligned = yoyValues.concat(new Array(forecast.length).fill(null));
     yoySeries = {name:'去年同期',type:'line',data:yoyAligned,smooth:true,symbol:'none',lineStyle:{color:'#94a3b8',width:1.5,type:'dotted'},itemStyle:{color:'#94a3b8'}};
@@ -935,7 +945,7 @@ function run(){
   if(yoySeries) series.push(yoySeries);
   // 安全库存展示在指标卡，不与日销量共用坐标轴。
   const legendData = ['历史销量','预测需求','置信上限','置信下限'];
-  if(sku.cat==='常规') legendData.splice(2, 0, '去年同期');
+  if(yoyData) legendData.splice(2, 0, '去年同期');
 
   chartInst.setOption({
     tooltip:{trigger:'axis',axisPointer:{type:'cross'},backgroundColor:'rgba(255,255,255,.96)',borderColor:'#e2e8f0',textStyle:{color:'#0f172a'}},
@@ -964,9 +974,9 @@ function run(){
   const spoilRate = (spoilRange[0] + spoilRng() * (spoilRange[1]-spoilRange[0])).toFixed(1);
   $('f-spoilage').innerHTML = `模拟报损率 <span>${spoilRate}%</span>`;
   // 参考窗口 & 历史同期
-  const refWin = {'短保':'30天','低温':'60天','常规':'90天 + 去年同期','日用':'120天历史 / 30天均值','个护':'120天历史 / 30天均值','文具':'120天历史 / 30天均值'}[sku.cat];
+  const refWin = {'短保':'30天','低温':'60天','常规':'90天 + 去年同期','日用':'120天 + 去年同期','个护':'120天 + 去年同期','文具':'120天 + 去年同期'}[sku.cat];
   $('f-refwindow').innerHTML = `参考窗口 <span>${refWin}</span>`;
-  if(sku.cat==='常规' && yoyAdjust){
+  if(yoyData && yoyAdjust){
     $('f-yoy').innerHTML = `历史同期修正 <span>${yoyAdjust>=1?'+'+(yoyAdjust-1).toFixed(2):'-'+Math.abs(yoyAdjust-1).toFixed(2)}x</span>`;
   } else {
     $('f-yoy').innerHTML = `历史同期修正 <span>不适用</span>`;
@@ -975,67 +985,69 @@ function run(){
   // 预测方法动态渲染
   const methodMap = {
     '短保': [
-      '<li><b>参考窗口</b> 最近 30 天（保质期1天，历史同期无参考价值）</li>',
+      '<li><b>参考窗口</b> 最近 30 天</li>',
       '<li><b>基线模型</b> SES（α=0.5）</li>',
       '<li><b>周Pattern</b> 工作日 +12~18%，周末 -22~28%（早餐场景）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 弱：9月开学季及暑假调整</li>',
       '<li><b>安全库存</b> max(1.28σ×√1, 日均×0.5天)，绝对上限1天销量</li>',
-      '<li><b>订货频率</b> 每日凌晨下单，当日上架当日清</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>订货频率</b> 每日凌晨下单，结合剩余效期与到货时间补货</li>',
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ],
     '低温': [
       '<li><b>参考窗口</b> 最近 60 天</li>',
       '<li><b>基线模型</b> SES（α=0.5）</li>',
       '<li><b>周Pattern</b> 周末 +18~22%，周中 -5~12%（家庭采购）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 夏季冰饮需求+25%（6~8月）</li>',
       '<li><b>安全库存</b> max(1.28σ×√2, 日均×1.0天)</li>',
       '<li><b>订货频率</b> 2~3天补一次，注意冷链到店时效</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ],
     '常规': [
       '<li><b>参考窗口</b> 最近90天 + 去年同期最近30天</li>',
       '<li><b>基线模型</b> SES（α=0.5）+ 历史同期同月修正（权重30%）</li>',
       '<li><b>周Pattern</b> 周末 +25~35%，周一 -15~18%（囤货+节后低谷）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 按商品细分类型使用模拟季节系数</li>',
       '<li><b>安全库存</b> max(1.28σ×√3, 日均×1.5天)</li>',
-      '<li><b>订货频率</b> 按预测周期批量下单</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>订货频率</b> 每7天补一次</li>',
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ],
     '日用': [
-      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>参考窗口</b> 120天历史 + 去年同期，基线取最近30天</li>',
       '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
       '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 忽略（全年平稳）</li>',
       '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
-      '<li><b>订货频率</b> 1~2周补一次</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>订货频率</b> 每14天补一次</li>',
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ],
     '个护': [
-      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>参考窗口</b> 120天历史 + 去年同期，基线取最近30天</li>',
       '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
       '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 忽略（全年平稳）</li>',
       '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
-      '<li><b>订货频率</b> 1~2周补一次</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>订货频率</b> 每14天补一次</li>',
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ],
     '文具': [
-      '<li><b>参考窗口</b> 120天历史，基线取最近30天</li>',
+      '<li><b>参考窗口</b> 120天历史 + 去年同期，基线取最近30天</li>',
       '<li><b>基线模型</b> SMA（30天简单移动平均）</li>',
       '<li><b>周Pattern</b> 无显著规律（日常刚需，随机购买）</li>',
-      '<li><b>节庆因子</b> 演示规则：国庆1.8倍、中秋1.5倍</li>',
+      '<li><b>节庆因子</b> 国庆1.8倍、中秋1.5倍</li>',
       '<li><b>季节性</b> 弱（9月开学季+15%）</li>',
       '<li><b>安全库存</b> max(1.28σ×√7, 日均×7天)</li>',
-      '<li><b>订货频率</b> 1~2周补一次</li>',
-      '<li><b>冷启动</b> 暂无冷启动数据，待接入真实数据</li>'
+      '<li><b>订货频率</b> 每14天补一次</li>',
+      '<li><b>冷启动</b> 历史不足时参考相似商品或门店</li>'
     ]
   };
   $('method-list').innerHTML = methodMap[sku.cat].join('');
+  if(sku.holidayLimited) $('method-list').insertAdjacentHTML('afterbegin','<li><b>节日限定</b> 节前上市、节中销售、节后退场</li>');
+  if(coldStart.source !== '自身历史') $('method-list').insertAdjacentHTML('beforeend',`<li><b>历史补足</b> ${coldStart.source}，自身 ${coldStart.ownDays} 天</li>`);
 
   // 业务提示
   const insights = generateInsight(history, forecast, result, sku);
@@ -1054,6 +1066,10 @@ function initApp(){
   bindFilterEvents();
   $('f-sku').selectedIndex = 0;
   $('btn-run').onclick = run;
+  const dialog=$('strategy-dialog'), opener=$('strategy-open');
+  opener.addEventListener('click',()=>dialog.showModal());
+  $('strategy-close').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',()=>opener.focus());
   $('btn-export').onclick = exportCSV;
   // 更新数据日期显示（T+1 = 昨天）
   const yest = getYesterday();
