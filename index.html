@@ -268,7 +268,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <tr><td>短保日配</td><td>1～3 天</td><td>30 天</td><td>7 天</td><td>每天</td><td>1 天</td><td>近期需求、报损</td></tr><tr><td>低温食品</td><td>5～21 天</td><td>60 天</td><td>14 天</td><td>3 天</td><td>2 天</td><td>约 5 天需求、冷链</td></tr><tr><td>常规食品</td><td>21 天以上</td><td>90 天 + 去年同期</td><td>30 天</td><td>7 天</td><td>3 天</td><td>约 10 天需求</td></tr><tr><td>节日限定食品</td><td>按 SKU 管理</td><td>90 天 + 去年同期</td><td>30 天</td><td>7 天</td><td>3 天</td><td>节前备货、节后退场</td></tr><tr><td>日用百货</td><td>约 2～5 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr><tr><td>美妆个护</td><td>约 2～3 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr><tr><td>文具小百</td><td>约 3～10 年</td><td>120 天 + 去年同期</td><td>30 天</td><td>14 天</td><td>7 天</td><td>约 21 天需求</td></tr>
     </tbody></table></div><p class="strategy-callout">效期以商品标识及具体 SKU 为准；预测范围和本次订货覆盖期分别管理。</p></section>
     <section><h3>03 · 需求影响因素</h3><p>基线需求结合周内变化、季节、节庆及商品生命周期；促销、缺货及效期是后续可接入的决策因素。</p><div class="strategy-table"><table><thead><tr><th>因素</th><th>短保日配</th><th>低温食品</th><th>常规食品</th><th>节日限定食品</th><th>日用百货</th><th>美妆个护</th><th>文具小百</th></tr></thead><tbody>
-      <tr><td>基线</td><td>SES</td><td>SES</td><td>SES + 同期参考</td><td>节日周期基线</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td></tr><tr><td>周内</td><td>工作日偏高</td><td>周末偏高</td><td>周末偏高</td><td>周末偏高</td><td>不设置</td><td>不设置</td><td>不设置</td></tr><tr><td>季节</td><td>开学季、暑假</td><td>夏季</td><td>按商品细分</td><td>节日销售窗口</td><td>同期参考</td><td>同期参考</td><td>开学季、同期参考</td></tr><tr><td>节庆</td><td>节日客流</td><td>节日采购</td><td>节日采购</td><td>节前上升、节后回落</td><td>节日因素</td><td>节日因素</td><td>节日因素</td></tr><tr><td>业务决策</td><td>效期与报损</td><td>冷链与临期</td><td>库存周转</td><td>上市、销售与退场</td><td>库存占用</td><td>商品差异</td><td>开学季供货</td></tr>
+      <tr><td>基线</td><td>SES</td><td>SES</td><td>SES + 同期参考</td><td>节日周期基线</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td><td>SMA + 同期参考</td></tr><tr><td>周内</td><td>工作日偏高</td><td>周末偏高</td><td>周末偏高</td><td>周末偏高</td><td>不设置</td><td>不设置</td><td>不设置</td></tr><tr><td>季节</td><td>开学季、暑假</td><td>夏季</td><td>按商品细分</td><td>节日销售窗口</td><td>同期参考</td><td>同期参考</td><td>开学季、同期参考</td></tr><tr><td>节庆</td><td>节日客流</td><td>节日采购</td><td>节日采购</td><td>节前上升、节后回落</td><td>节日因素</td><td>节日因素</td><td>节日因素</td></tr><tr><td>促销活动</td><td>短期促销</td><td>组合促销</td><td>折扣活动</td><td>节前活动</td><td>集中采购</td><td>新品推广</td><td>开学促销</td></tr><tr><td>库存与缺货</td><td>缺货识别</td><td>库存与临期</td><td>区分缺货与需求下降</td><td>节前供货</td><td>低销量与缺货</td><td>低销量与缺货</td><td>活动前供货</td></tr><tr><td>业务决策</td><td>效期与报损</td><td>冷链与临期</td><td>库存周转</td><td>上市、销售与退场</td><td>库存占用</td><td>商品差异</td><td>开学季供货</td></tr>
     </tbody></table></div></section>
     <section><h3>04 · 冷启动策略</h3><p>历史不足时，以相似对象建立基线；自身数据积累后，逐步提高自身销量的权重。</p><div class="strategy-table"><table><thead><tr><th>场景</th><th>参考对象</th><th>预测思路</th></tr></thead><tbody><tr><td>新品无历史</td><td>同门店同品类商品</td><td>以相似商品销量建立初始基线</td></tr><tr><td>新门店无历史</td><td>同城市相似门店</td><td>参考同 SKU 的销量</td></tr><tr><td>节日限定新品</td><td>同类节日商品及往年同期</td><td>参考节前、节中与节后变化</td></tr><tr><td>已有少量历史</td><td>自身销量 + 相似对象</td><td>按有效天数逐步增加自身权重</td></tr><tr><td>历史充足</td><td>本门店本 SKU</td><td>使用自身历史进行预测</td></tr></tbody></table></div></section>
   </div>
@@ -482,7 +482,7 @@ function seededRandom(seed){
 }
 
 /* 生成历史销量：按品类决定参考天数，叠加周Pattern+季节性+节庆 */
-function generateHistory(store, sku, endDate=getYesterday()){
+function generateHistory(store, sku, endDate=getYesterday(), seedOffset=0){
   // 不同品类参考不同天数的历史数据；非食品120天
   const REF_DAYS = {'短保':30, '低温':60, '常规':90, '日用':120, '个护':120, '文具':120};
   const days = REF_DAYS[sku.cat] || 60;
@@ -498,7 +498,7 @@ function generateHistory(store, sku, endDate=getYesterday()){
   const base = baseMap[sku.subcat] || 10;
   const seedBase = store.store_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
                    + sku.sku_id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) * 1000;
-  const rng = seededRandom(seedBase);
+  const rng = seededRandom(seedBase + seedOffset);
   const storeFactor = 0.8 + rng()*0.4;
   const skuFactor = sku.is_pb ? 0.7 : 1.0;
 
@@ -520,7 +520,7 @@ function generateHistory(store, sku, endDate=getYesterday()){
 function generateYoY(store, sku, endDate=getYesterday()){
   const previous = new Date(endDate);
   previous.setFullYear(previous.getFullYear()-1);
-  return generateHistory(store, sku, previous);
+  return generateHistory(store, sku, previous, 3333);
 }
 
 // 数据不足时，用同店同类或同城同 SKU 的历史补足，随有效天数增加自身权重。
